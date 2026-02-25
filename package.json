@@ -1,0 +1,23 @@
+{
+  "name": "auto-e2e",
+  "version": "1.0.0",
+  "description": "Portable YAML-driven E2E testing framework powered by Playwright",
+  "main": "index.js",
+  "bin": {
+    "auto-e2e": "./index.js"
+  },
+  "scripts": {
+    "test": "node index.js",
+    "test:config": "node index.js --config"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0",
+    "js-yaml": "^4.1.0",
+    "pixelmatch": "5.3.0",
+    "pngjs": "^7.0.0",
+    "chalk": "^4.1.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

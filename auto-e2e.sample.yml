@@ -1,0 +1,133 @@
+# auto-e2e.yml - E2E Test Configuration
+# Copy this file to your project root and rename it to auto-e2e.yml
+
+# ──────────────────────────────────────────────
+# App Configuration
+# ──────────────────────────────────────────────
+app:
+  command: "npm run dev"           # Shell command to start the dev server
+  url: "http://localhost:4200"     # Base URL to wait for before running tests
+  startTimeout: 30000              # Max ms to wait for the server to respond (default: 30000)
+  browsers:                         # list of browsers to run tests in (default: ["chromium"])
+    - "chromium"
+    # - "firefox"                   # uncomment to also run in Firefox
+    # - "webkit"                    # uncomment to also run in WebKit/Safari
+  headless: true                   # Run browser headlessly (default: true)
+  viewport:
+    width: 1280                    # Default viewport width (default: 1280)
+    height: 720                    # Default viewport height (default: 720)
+
+# ──────────────────────────────────────────────
+# Visual Regression Defaults
+# ──────────────────────────────────────────────
+visualDefaults:
+  baselineDir: "./screenshots/baseline"   # Where baseline PNGs live
+  diffDir: "./screenshots/diff"           # Where diff PNGs are written on failure
+  currentDir: "./screenshots/current"     # Where current run PNGs are written
+  threshold: 0.1                          # pixelmatch color threshold 0-1 (default: 0.1)
+  failOnMissingBaseline: false            # false = auto-create baseline on first run
+
+# ──────────────────────────────────────────────
+# Functional Test Cases
+# ──────────────────────────────────────────────
+tests:
+  - name: "Homepage loads correctly"
+    path: "/"
+    actions:
+      - action: wait
+        timeout: 1000
+    assertions:
+      - type: element-exists
+        selector: "h1"
+      - type: text-contains
+        selector: "h1"
+        expected: "Welcome"
+      - type: element-visible
+        selector: ".hero-banner"
+
+  - name: "Login flow"
+    path: "/login"
+    actions:
+      - action: type
+        selector: "#email"
+        value: "user@example.com"
+      - action: type
+        selector: "#password"
+        value: "secret123"
+      - action: click
+        selector: "button[type='submit']"
+      - action: wait-for-navigation
+    assertions:
+      - type: url-matches
+        expected: "/dashboard"
+      - type: element-exists
+        selector: ".dashboard-container"
+      - type: text-contains
+        selector: ".welcome-message"
+        expected: "Hello"
+
+  - name: "Navigation menu has correct links"
+    path: "/"
+    assertions:
+      - type: element-count
+        selector: "nav a"
+        expected: 5
+      - type: element-visible
+        selector: "nav"
+
+# ──────────────────────────────────────────────
+# Visual Regression Test Cases
+# ──────────────────────────────────────────────
+visualTests:
+  - name: "Homepage visual check"
+    path: "/"
+    baseline: "homepage.png"
+    actions:
+      - action: wait
+        timeout: 1000
+    screenshotOptions:
+      fullPage: true
+    comparison:
+      mode: "threshold"
+      maxDiffPercent: 1.5
+      threshold: 0.1
+
+  - name: "Login page visual check"
+    path: "/login"
+    baseline: "login-page.png"
+    comparison:
+      mode: "pixel-perfect"
+
+  - name: "Dashboard header component"
+    path: "/dashboard"
+    baseline: "dashboard-header.png"
+    screenshotOptions:
+      selector: ".dashboard-header"
+    comparison:
+      mode: "threshold"
+      maxDiffPercent: 0.5
+
+# ──────────────────────────────────────────────
+# Supported Actions:
+#   click          - { action: click, selector: "#btn" }
+#   type           - { action: type, selector: "#input", value: "text" }
+#   hover          - { action: hover, selector: ".menu" }
+#   select         - { action: select, selector: "#dropdown", value: "option1" }
+#   scroll         - { action: scroll, selector: "footer" }
+#   wait           - { action: wait, timeout: 1000 }
+#   wait-for-selector - { action: wait-for-selector, selector: ".loaded" }
+#   wait-for-navigation - { action: wait-for-navigation }
+#   press          - { action: press, selector: "#input", key: "Enter" }
+#   clear          - { action: clear, selector: "#input" }
+#
+# Supported Assertions:
+#   element-exists     - { type: element-exists, selector: "h1" }
+#   element-not-exists - { type: element-not-exists, selector: ".error" }
+#   element-visible    - { type: element-visible, selector: ".banner" }
+#   text-contains      - { type: text-contains, selector: "h1", expected: "Welcome" }
+#   text-equals        - { type: text-equals, selector: ".title", expected: "Exact Text" }
+#   url-matches        - { type: url-matches, expected: "/dashboard" }
+#   title-contains     - { type: title-contains, expected: "My App" }
+#   attribute-equals   - { type: attribute-equals, selector: "img", attribute: "alt", expected: "Logo" }
+#   element-count      - { type: element-count, selector: "li", expected: 5 }
+# ──────────────────────────────────────────────

@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>auto-e2e Documentation</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #161922;
+      --surface-2: #1c1f2b;
+      --border: #2a2d3a;
+      --text: #e1e4ed;
+      --text-dim: #8b8fa3;
+      --accent: #6c5ce7;
+      --accent-light: #a29bfe;
+      --green: #00b894;
+      --green-dim: #00b89433;
+      --red: #e17055;
+      --red-dim: #e1705533;
+      --yellow: #fdcb6e;
+      --yellow-dim: #fdcb6e33;
+      --blue: #74b9ff;
+      --blue-dim: #74b9ff22;
+      --code-bg: #1a1d2e;
+      --sidebar-w: 280px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-w);
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 24px 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 0 24px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-logo h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--accent-light);
+      letter-spacing: -0.5px;
+    }
+
+    .sidebar-logo .version {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .sidebar nav { padding: 0 12px; }
+
+    .sidebar .nav-section {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      padding: 16px 12px 6px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 6px 12px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 13.5px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .sidebar a:hover { color: var(--text); background: var(--surface-2); }
+
+    /* Main content */
+    .main {
+      margin-left: var(--sidebar-w);
+      max-width: 880px;
+      padding: 48px 56px 120px;
+    }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 56px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero h1 {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      background: linear-gradient(135deg, var(--accent-light), var(--blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-dim);
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .badge.green { color: var(--green); border-color: var(--green); background: var(--green-dim); }
+    .badge.blue { color: var(--blue); border-color: var(--blue); background: var(--blue-dim); }
+    .badge.yellow { color: var(--yellow); border-color: var(--yellow); background: var(--yellow-dim); }
+
+    /* Sections */
+    section { margin-bottom: 56px; }
+
+    h2 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 19px;
+      font-weight: 600;
+      margin: 32px 0 12px;
+      color: var(--accent-light);
+    }
+
+    h4 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 24px 0 8px;
+      color: var(--text);
+    }
+
+    p { margin-bottom: 12px; }
+
+    /* Code blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 12px 0 20px;
+      font-size: 13.5px;
+      line-height: 1.65;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+      font-size: 13px;
+    }
+
+    :not(pre) > code {
+      background: var(--surface-2);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      font-size: 12.5px;
+    }
+
+    /* YAML syntax highlighting */
+    .hl-key { color: #74b9ff; }
+    .hl-str { color: #00b894; }
+    .hl-num { color: #fdcb6e; }
+    .hl-comment { color: #636e82; font-style: italic; }
+    .hl-bool { color: #e17055; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 24px;
+      font-size: 14px;
+    }
+
+    th {
+      text-align: left;
+      padding: 10px 14px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-dim);
+    }
+
+    td {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      vertical-align: top;
+    }
+
+    tr:hover td { background: var(--surface-2); }
+
+    /* Cards */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin: 16px 0;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+
+    .card h4 { margin-top: 0; }
+
+    .card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    /* Tag */
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 4px;
+      margin: 0 2px;
+    }
+
+    .tag.required { background: var(--red-dim); color: var(--red); }
+    .tag.optional { background: var(--blue-dim); color: var(--blue); }
+    .tag.default { background: var(--surface-2); color: var(--text-dim); }
+
+    /* Steps */
+    .steps { counter-reset: step; margin: 16px 0; }
+    .step {
+      position: relative;
+      padding: 0 0 28px 48px;
+      counter-increment: step;
+    }
+    .step::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .step::after {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 36px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .step:last-child::after { display: none; }
+    .step h4 { margin-top: 4px; }
+
+    /* Callout */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--surface);
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      margin: 16px 0;
+      font-size: 14px;
+    }
+
+    .callout.warn { border-left-color: var(--yellow); }
+    .callout.danger { border-left-color: var(--red); }
+    .callout.success { border-left-color: var(--green); }
+
+    .callout strong { display: block; margin-bottom: 4px; }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .flow-step {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .flow-arrow { color: var(--text-dim); font-size: 18px; }
+
+    /* File tree */
+    .file-tree {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 24px;
+      font-family: 'JetBrains Mono', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      margin: 12px 0 20px;
+    }
+
+    .file-tree .folder { color: var(--blue); }
+    .file-tree .file { color: var(--text-dim); }
+    .file-tree .desc { color: #636e82; }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 32px 24px 80px; }
+      .card-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>auto-e2e</h1>
+    <div class="version">v1.0.0 &middot; Documentation</div>
+  </div>
+  <nav>
+    <div class="nav-section">Getting Started</div>
+    <a href="#overview">Overview</a>
+    <a href="#installation">Installation</a>
+    <a href="#quick-start">Quick Start</a>
+    <a href="#project-structure">Project Structure</a>
+
+    <div class="nav-section">Configuration</div>
+    <a href="#yaml-config">YAML Config File</a>
+    <a href="#app-config">App Configuration</a>
+    <a href="#visual-defaults">Visual Defaults</a>
+    <a href="#cli-flags">CLI Flags</a>
+
+    <div class="nav-section">Tests</div>
+    <a href="#functional-tests">Functional Tests</a>
+    <a href="#actions">Actions</a>
+    <a href="#assertions">Assertions</a>
+
+    <div class="nav-section">Visual Regression</div>
+    <a href="#visual-tests">Visual Tests</a>
+    <a href="#comparison-modes">Comparison Modes</a>
+    <a href="#screenshot-options">Screenshot Options</a>
+
+    <div class="nav-section">Output</div>
+    <a href="#console-output">Console Output</a>
+    <a href="#json-report">JSON Report</a>
+
+    <div class="nav-section">Reference</div>
+    <a href="#defaults">Default Values</a>
+    <a href="#error-handling">Error Handling</a>
+    <a href="#exit-codes">Exit Codes</a>
+    <a href="#architecture">Architecture</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- Hero -->
+  <header class="hero" id="overview">
+    <h1>auto-e2e</h1>
+    <p>A portable, YAML-driven end-to-end testing framework powered by Playwright. Drop it into any frontend project, run the same tests across multiple browsers with a single configuration file.</p>
+    <div class="badge-row">
+      <span class="badge green">Node.js &ge; 18</span>
+      <span class="badge blue">Playwright</span>
+      <span class="badge yellow">Visual Regression</span>
+      <span class="badge">Multi-Browser</span>
+      <span class="badge">CommonJS</span>
+      <span class="badge">Cross-Platform</span>
+    </div>
+  </header>
+
+  <!-- Installation -->
+  <section id="installation">
+    <h2>Installation</h2>
+    <div class="steps">
+      <div class="step">
+        <h4>Copy into your project</h4>
+        <p>Copy the <code>auto-e2e</code> folder into the root of your frontend project (Angular, Vue, React, or any framework).</p>
+      </div>
+      <div class="step">
+        <h4>Install dependencies</h4>
+        <pre><code>cd auto-e2e
+npm install</code></pre>
+      </div>
+      <div class="step">
+        <h4>Install Playwright browsers</h4>
+        <pre><code><span class="hl-comment"># Install only chromium (default)</span>
+npx playwright install chromium
+
+<span class="hl-comment"># Or install all browsers you plan to test with</span>
+npx playwright install chromium firefox webkit</code></pre>
+      </div>
+      <div class="step">
+        <h4>Create your config</h4>
+        <p>Copy <code>auto-e2e.sample.yml</code> to your project root and rename it to <code>auto-e2e.yml</code>. Edit it to match your app.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start -->
+  <section id="quick-start">
+    <h2>Quick Start</h2>
+    <p>Here's a minimal <code>auto-e2e.yml</code> to get started:</p>
+    <pre><code><span class="hl-key">app</span>:
+  <span class="hl-key">command</span>: <span class="hl-str">"npm run dev"</span>
+  <span class="hl-key">url</span>: <span class="hl-str">"http://localhost:4200"</span>
+
+<span class="hl-key">tests</span>:
+  - <span class="hl-key">name</span>: <span class="hl-str">"Homepage loads"</span>
+    <span class="hl-key">path</span>: <span class="hl-str">"/"</span>
+    <span class="hl-key">assertions</span>:
+      - <span class="hl-key">type</span>: <span class="hl-str">element-exists</span>
+        <span class="hl-key">selector</span>: <span class="hl-str">"h1"</span></code></pre>
+
+    <p>Run it:</p>
+    <pre><code>node auto-e2e/index.js</code></pre>
+
+    <div class="callout success">
+      <strong>What happens</strong>
+      The tool starts your dev server, waits for it to be ready, then for each browser in the <code>browsers</code> list it opens a headless instance, navigates to each test path, executes actions, evaluates assertions, and prints results. The server is automatically killed when done.
+    </div>
+
+    <h3>Execution Flow</h3>
+    <div class="flow">
+      <span class="flow-step">Load YAML</span>
+      <span class="flow-arrow">&rarr;</span>
+      <span class="flow-step">Start Server</span>
+      <span class="flow-arrow">&rarr;</span>
+      <span class="flow-step">Poll URL</span>
+      <span class="flow-arrow">&rarr;</span>
+      <span class="flow-step">For each browser</span>
+      <span class="flow-arrow">&rarr;</span>
+      <span class="flow-step">Launch &amp; Run Tests</span>
+      <span class="flow-arrow">&rarr;</span>
+      <span class="flow-step">Write Report</span>
+      <span class="flow-arrow">&rarr;</span>
+      <span class="flow-step">Kill Server</span>
+    </div>
+  </section>
+
+  <!-- Project Structure -->
+  <section id="project-structure">
+    <h2>Project Structure</h2>
+    <div class="file-tree">
+      <span class="folder">auto-e2e/</span><br>
+      &nbsp;&nbsp;<span class="file">package.json</span><br>
+      &nbsp;&nbsp;<span class="file">index.js</span> <span class="desc">&larr; CLI entry point</span><br>
+      &nbsp;&nbsp;<span class="file">auto-e2e.sample.yml</span> <span class="desc">&larr; example config</span><br>
+      &nbsp;&nbsp;<span class="folder">src/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">config-loader.js</span> <span class="desc">&larr; parse YAML, validate, apply defaults</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">schema.js</span> <span class="desc">&larr; validation rules</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">server-manager.js</span> <span class="desc">&larr; start/stop dev server</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">test-runner.js</span> <span class="desc">&larr; orchestrate Playwright</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">action-executor.js</span> <span class="desc">&larr; click, type, hover&hellip;</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">assertion-engine.js</span> <span class="desc">&larr; element-exists, text-contains&hellip;</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">visual-comparator.js</span> <span class="desc">&larr; screenshot &amp; pixelmatch</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">reporter.js</span> <span class="desc">&larr; console output &amp; JSON report</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">utils.js</span> <span class="desc">&larr; helpers (delay, pollUrl, ensureDir)</span><br>
+    </div>
+  </section>
+
+  <!-- YAML Config -->
+  <section id="yaml-config">
+    <h2>YAML Configuration</h2>
+    <p>The configuration file has four top-level sections:</p>
+
+    <table>
+      <thead><tr><th>Section</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>app</code></td><td><span class="tag required">required</span></td><td>Dev server command, URL, browser settings</td></tr>
+        <tr><td><code>visualDefaults</code></td><td><span class="tag optional">optional</span></td><td>Screenshot directories, comparison thresholds</td></tr>
+        <tr><td><code>tests</code></td><td><span class="tag optional">optional*</span></td><td>Functional test cases with actions &amp; assertions</td></tr>
+        <tr><td><code>visualTests</code></td><td><span class="tag optional">optional*</span></td><td>Visual regression test cases</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>Note</strong>
+      At least one of <code>tests</code> or <code>visualTests</code> must be defined. You can use both, but the config is invalid if neither exists.
+    </div>
+  </section>
+
+  <!-- App Config -->
+  <section id="app-config">
+    <h2>App Configuration</h2>
+    <pre><code><span class="hl-key">app</span>:
+  <span class="hl-key">command</span>: <span class="hl-str">"npm run dev"</span>           <span class="hl-comment"># command to start the dev server</span>
+  <span class="hl-key">url</span>: <span class="hl-str">"http://localhost:4200"</span>     <span class="hl-comment"># base URL to wait for</span>
+  <span class="hl-key">startTimeout</span>: <span class="hl-num">30000</span>              <span class="hl-comment"># max ms to wait for server</span>
+  <span class="hl-key">browsers</span>:                         <span class="hl-comment"># list of browsers to test in</span>
+    - <span class="hl-str">"chromium"</span>
+    - <span class="hl-str">"firefox"</span>
+  <span class="hl-key">headless</span>: <span class="hl-bool">true</span>                   <span class="hl-comment"># run browsers headlessly</span>
+  <span class="hl-key">viewport</span>:
+    <span class="hl-key">width</span>: <span class="hl-num">1280</span>
+    <span class="hl-key">height</span>: <span class="hl-num">720</span></code></pre>
+
+    <table>
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>command</code></td><td>string</td><td><span class="tag required">required</span></td><td>&mdash;</td><td>Shell command to start the dev server</td></tr>
+        <tr><td><code>url</code></td><td>string</td><td><span class="tag required">required</span></td><td>&mdash;</td><td>Base URL (must start with <code>http://</code> or <code>https://</code>)</td></tr>
+        <tr><td><code>startTimeout</code></td><td>number</td><td><span class="tag optional">optional</span></td><td><code>30000</code></td><td>Maximum milliseconds to wait for the server</td></tr>
+        <tr><td><code>browsers</code></td><td>string[]</td><td><span class="tag optional">optional</span></td><td><code>["chromium"]</code></td><td>List of browser engines to run tests in. Values: <code>chromium</code>, <code>firefox</code>, <code>webkit</code></td></tr>
+        <tr><td><code>browser</code></td><td>string</td><td><span class="tag optional">optional</span></td><td>&mdash;</td><td>Shorthand for a single browser (converted to <code>browsers: [value]</code> internally)</td></tr>
+        <tr><td><code>headless</code></td><td>boolean</td><td><span class="tag optional">optional</span></td><td><code>true</code></td><td>Run in headless mode</td></tr>
+        <tr><td><code>viewport.width</code></td><td>number</td><td><span class="tag optional">optional</span></td><td><code>1280</code></td><td>Browser viewport width in pixels</td></tr>
+        <tr><td><code>viewport.height</code></td><td>number</td><td><span class="tag optional">optional</span></td><td><code>720</code></td><td>Browser viewport height in pixels</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Multi-Browser Testing</h3>
+    <p>When multiple browsers are specified, the entire test suite runs sequentially in each browser. Results are aggregated into a single report with a <code>browser</code> field on each test result.</p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="label">Single browser (default)</div>
+        <pre><code><span class="hl-key">app</span>:
+  <span class="hl-key">browsers</span>:
+    - <span class="hl-str">"chromium"</span></code></pre>
+      </div>
+      <div class="card">
+        <div class="label">All three browsers</div>
+        <pre><code><span class="hl-key">app</span>:
+  <span class="hl-key">browsers</span>:
+    - <span class="hl-str">"chromium"</span>
+    - <span class="hl-str">"firefox"</span>
+    - <span class="hl-str">"webkit"</span></code></pre>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Backward compatibility</strong>
+      The old <code>browser: "firefox"</code> (single string) syntax still works. It is automatically converted to <code>browsers: ["firefox"]</code>.
+    </div>
+
+    <div class="callout warn">
+      <strong>Visual regression &amp; multi-browser</strong>
+      Each browser uses its own subdirectory for screenshots: <code>baseline/chromium/</code>, <code>baseline/firefox/</code>, etc. This prevents false diffs caused by rendering differences between engines.
+    </div>
+  </section>
+
+  <!-- Visual Defaults -->
+  <section id="visual-defaults">
+    <h2>Visual Defaults</h2>
+    <pre><code><span class="hl-key">visualDefaults</span>:
+  <span class="hl-key">baselineDir</span>: <span class="hl-str">"./screenshots/baseline"</span>   <span class="hl-comment"># baseline PNGs</span>
+  <span class="hl-key">diffDir</span>: <span class="hl-str">"./screenshots/diff"</span>           <span class="hl-comment"># diff PNGs on failure</span>
+  <span class="hl-key">currentDir</span>: <span class="hl-str">"./screenshots/current"</span>     <span class="hl-comment"># current run PNGs</span>
+  <span class="hl-key">threshold</span>: <span class="hl-num">0.1</span>                          <span class="hl-comment"># pixelmatch color threshold 0-1</span>
+  <span class="hl-key">failOnMissingBaseline</span>: <span class="hl-bool">false</span>            <span class="hl-comment"># false = auto-create baseline</span></code></pre>
+
+    <table>
+      <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>baselineDir</code></td><td>string</td><td><code>./screenshots/baseline</code></td><td>Directory for baseline PNG files</td></tr>
+        <tr><td><code>diffDir</code></td><td>string</td><td><code>./screenshots/diff</code></td><td>Directory where diff images are saved on failure</td></tr>
+        <tr><td><code>currentDir</code></td><td>string</td><td><code>./screenshots/current</code></td><td>Directory for current run screenshots</td></tr>
+        <tr><td><code>threshold</code></td><td>number</td><td><code>0.1</code></td><td>Pixelmatch color sensitivity (0 = exact, 1 = lenient)</td></tr>
+        <tr><td><code>failOnMissingBaseline</code></td><td>boolean</td><td><code>false</code></td><td>If <code>false</code>, auto-creates baseline on first run. If <code>true</code>, test fails when baseline is missing.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Path resolution</strong>
+      All paths are resolved relative to the YAML config file location, not the working directory.
+    </div>
+  </section>
+
+  <!-- CLI Flags -->
+  <section id="cli-flags">
+    <h2>CLI Flags</h2>
+    <pre><code>node auto-e2e/index.js [options]</code></pre>
+
+    <table>
+      <thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>--config &lt;path&gt;</code></td><td><code>auto-e2e.yml</code></td><td>Path to the YAML configuration file</td></tr>
+        <tr><td><code>--output &lt;path&gt;</code></td><td><code>auto-e2e-results.json</code></td><td>Path for the JSON results report</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Examples</h4>
+    <pre><code><span class="hl-comment"># Use defaults</span>
+node auto-e2e/index.js
+
+<span class="hl-comment"># Custom config file</span>
+node auto-e2e/index.js --config tests/e2e-config.yml
+
+<span class="hl-comment"># Custom config and output path</span>
+node auto-e2e/index.js --config ci.yml --output reports/e2e.json</code></pre>
+  </section>
+
+  <!-- Functional Tests -->
+  <section id="functional-tests">
+    <h2>Functional Tests</h2>
+    <p>Functional tests navigate to a page, perform actions, and verify assertions.</p>
+
+    <pre><code><span class="hl-key">tests</span>:
+  - <span class="hl-key">name</span>: <span class="hl-str">"Login flow"</span>            <span class="hl-comment"># human-readable test name</span>
+    <span class="hl-key">path</span>: <span class="hl-str">"/login"</span>                <span class="hl-comment"># appended to app.url</span>
+    <span class="hl-key">actions</span>:                       <span class="hl-comment"># optional sequence of actions</span>
+      - <span class="hl-key">action</span>: <span class="hl-str">type</span>
+        <span class="hl-key">selector</span>: <span class="hl-str">"#email"</span>
+        <span class="hl-key">value</span>: <span class="hl-str">"user@example.com"</span>
+      - <span class="hl-key">action</span>: <span class="hl-str">click</span>
+        <span class="hl-key">selector</span>: <span class="hl-str">"button[type='submit']"</span>
+      - <span class="hl-key">action</span>: <span class="hl-str">wait-for-navigation</span>
+    <span class="hl-key">assertions</span>:                    <span class="hl-comment"># required, at least one</span>
+      - <span class="hl-key">type</span>: <span class="hl-str">url-matches</span>
+        <span class="hl-key">expected</span>: <span class="hl-str">"/dashboard"</span>
+      - <span class="hl-key">type</span>: <span class="hl-str">text-contains</span>
+        <span class="hl-key">selector</span>: <span class="hl-str">".welcome"</span>
+        <span class="hl-key">expected</span>: <span class="hl-str">"Hello"</span></code></pre>
+
+    <table>
+      <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td><span class="tag required">required</span></td><td>Descriptive name shown in output</td></tr>
+        <tr><td><code>path</code></td><td><span class="tag required">required</span></td><td>URL path appended to <code>app.url</code></td></tr>
+        <tr><td><code>actions</code></td><td><span class="tag optional">optional</span></td><td>Sequence of browser actions to perform</td></tr>
+        <tr><td><code>assertions</code></td><td><span class="tag required">required</span></td><td>Non-empty array of assertions to evaluate</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>Behavior on failure</strong>
+      If an <strong>action</strong> fails, remaining actions and all assertions are skipped&mdash;the test is marked failed immediately. If an <strong>assertion</strong> fails, remaining assertions still run to give a full picture.
+    </div>
+  </section>
+
+  <!-- Actions -->
+  <section id="actions">
+    <h2>Actions Reference</h2>
+    <p>Actions are executed in order before assertions. Each action maps to a Playwright API call.</p>
+
+    <div class="card">
+      <h4><code>click</code></h4>
+      <p>Clicks the first element matching the selector.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">click</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"#submit-btn"</span>       <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>type</code></h4>
+      <p>Clears the field and fills it with the given text.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">type</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"#email"</span>            <span class="hl-comment"># required</span>
+  <span class="hl-key">value</span>: <span class="hl-str">"user@example.com"</span>    <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>hover</code></h4>
+      <p>Hovers over the matching element.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">hover</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">".tooltip-trigger"</span>  <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>select</code></h4>
+      <p>Selects an option in a <code>&lt;select&gt;</code> element.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">select</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"#language"</span>          <span class="hl-comment"># required</span>
+  <span class="hl-key">value</span>: <span class="hl-str">"fr"</span>                  <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>scroll</code></h4>
+      <p>Scrolls the matching element into view.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">scroll</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"footer"</span>            <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>wait</code></h4>
+      <p>Pauses execution for a fixed duration.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">wait</span>
+  <span class="hl-key">timeout</span>: <span class="hl-num">1000</span>                <span class="hl-comment"># required, in ms</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>wait-for-selector</code></h4>
+      <p>Waits until an element appears in the DOM.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">wait-for-selector</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">".content-loaded"</span>   <span class="hl-comment"># required</span>
+  <span class="hl-key">timeout</span>: <span class="hl-num">5000</span>                <span class="hl-comment"># optional, default 5000ms</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>wait-for-navigation</code></h4>
+      <p>Waits for the page to finish loading (network idle).</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">wait-for-navigation</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>press</code></h4>
+      <p>Presses a keyboard key on the focused element.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">press</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"#search"</span>           <span class="hl-comment"># required</span>
+  <span class="hl-key">key</span>: <span class="hl-str">"Enter"</span>                <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>clear</code></h4>
+      <p>Clears the content of an input field.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">clear</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"#search-input"</span>     <span class="hl-comment"># required</span></code></pre>
+    </div>
+  </section>
+
+  <!-- Assertions -->
+  <section id="assertions">
+    <h2>Assertions Reference</h2>
+    <p>Assertions verify the state of the page after actions complete. All assertions in a test are evaluated even if some fail.</p>
+
+    <div class="card">
+      <h4><code>element-exists</code></h4>
+      <p>Passes if the element is present in the DOM.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">element-exists</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"h1"</span>    <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>element-not-exists</code></h4>
+      <p>Passes if the element is NOT present in the DOM.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">element-not-exists</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">".error-banner"</span>    <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>element-visible</code></h4>
+      <p>Passes if the element is visible on the page.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">element-visible</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">".hero-banner"</span>    <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>text-contains</code></h4>
+      <p>Passes if the element's text content includes the expected substring.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">text-contains</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"h1"</span>              <span class="hl-comment"># required</span>
+  <span class="hl-key">expected</span>: <span class="hl-str">"Welcome"</span>         <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>text-equals</code></h4>
+      <p>Passes if the element's trimmed text content exactly matches.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">text-equals</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">".page-title"</span>     <span class="hl-comment"># required</span>
+  <span class="hl-key">expected</span>: <span class="hl-str">"Dashboard"</span>       <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>url-matches</code></h4>
+      <p>Passes if the current page URL includes the expected string.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">url-matches</span>
+  <span class="hl-key">expected</span>: <span class="hl-str">"/dashboard"</span>      <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>title-contains</code></h4>
+      <p>Passes if the page title includes the expected string.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">title-contains</span>
+  <span class="hl-key">expected</span>: <span class="hl-str">"My App"</span>          <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>attribute-equals</code></h4>
+      <p>Passes if the element's attribute matches the expected value.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">attribute-equals</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"img.logo"</span>        <span class="hl-comment"># required</span>
+  <span class="hl-key">attribute</span>: <span class="hl-str">"alt"</span>             <span class="hl-comment"># required</span>
+  <span class="hl-key">expected</span>: <span class="hl-str">"Company Logo"</span>    <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>element-count</code></h4>
+      <p>Passes if the number of matching elements equals the expected count.</p>
+      <pre><code>- <span class="hl-key">type</span>: <span class="hl-str">element-count</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"ul.nav li"</span>       <span class="hl-comment"># required</span>
+  <span class="hl-key">expected</span>: <span class="hl-num">5</span>                 <span class="hl-comment"># required, must be a number</span></code></pre>
+    </div>
+  </section>
+
+  <!-- Visual Tests -->
+  <section id="visual-tests">
+    <h2>Visual Regression Tests</h2>
+    <p>Visual tests capture screenshots and compare them against stored baselines using <a href="https://github.com/mapbox/pixelmatch" style="color: var(--accent-light)">pixelmatch</a>.</p>
+
+    <pre><code><span class="hl-key">visualTests</span>:
+  - <span class="hl-key">name</span>: <span class="hl-str">"Homepage visual check"</span>
+    <span class="hl-key">path</span>: <span class="hl-str">"/"</span>
+    <span class="hl-key">baseline</span>: <span class="hl-str">"homepage.png"</span>      <span class="hl-comment"># filename in baselineDir</span>
+    <span class="hl-key">actions</span>:                        <span class="hl-comment"># optional pre-screenshot actions</span>
+      - <span class="hl-key">action</span>: <span class="hl-str">wait</span>
+        <span class="hl-key">timeout</span>: <span class="hl-num">1000</span>
+    <span class="hl-key">screenshotOptions</span>:
+      <span class="hl-key">fullPage</span>: <span class="hl-bool">true</span>
+    <span class="hl-key">comparison</span>:
+      <span class="hl-key">mode</span>: <span class="hl-str">"threshold"</span>
+      <span class="hl-key">maxDiffPercent</span>: <span class="hl-num">1.5</span>
+      <span class="hl-key">threshold</span>: <span class="hl-num">0.1</span></code></pre>
+
+    <table>
+      <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td><span class="tag required">required</span></td><td>Descriptive name for the test</td></tr>
+        <tr><td><code>path</code></td><td><span class="tag required">required</span></td><td>URL path appended to <code>app.url</code></td></tr>
+        <tr><td><code>baseline</code></td><td><span class="tag required">required</span></td><td>Filename for the baseline PNG (stored in <code>baselineDir</code>)</td></tr>
+        <tr><td><code>actions</code></td><td><span class="tag optional">optional</span></td><td>Actions to perform before taking the screenshot</td></tr>
+        <tr><td><code>screenshotOptions</code></td><td><span class="tag optional">optional</span></td><td>Screenshot configuration (see below)</td></tr>
+        <tr><td><code>comparison</code></td><td><span class="tag optional">optional</span></td><td>Comparison mode and thresholds</td></tr>
+      </tbody>
+    </table>
+
+    <h3>First Run Behavior</h3>
+    <div class="callout success">
+      <strong>Auto-baseline creation</strong>
+      When <code>failOnMissingBaseline</code> is <code>false</code> (the default), the first run automatically saves the screenshot as the baseline. Subsequent runs compare against it. Set to <code>true</code> in CI if baselines should be pre-committed.
+    </div>
+  </section>
+
+  <!-- Comparison Modes -->
+  <section id="comparison-modes">
+    <h2>Comparison Modes</h2>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="label">Mode</div>
+        <h4><code>pixel-perfect</code></h4>
+        <p>Zero tolerance. The test fails if <em>any</em> pixel differs between the baseline and the current screenshot.</p>
+        <pre><code><span class="hl-key">comparison</span>:
+  <span class="hl-key">mode</span>: <span class="hl-str">"pixel-perfect"</span></code></pre>
+      </div>
+      <div class="card">
+        <div class="label">Mode</div>
+        <h4><code>threshold</code></h4>
+        <p>Allows a configurable percentage of pixel differences. Ideal for anti-aliasing and rendering variations.</p>
+        <pre><code><span class="hl-key">comparison</span>:
+  <span class="hl-key">mode</span>: <span class="hl-str">"threshold"</span>
+  <span class="hl-key">maxDiffPercent</span>: <span class="hl-num">1.5</span>
+  <span class="hl-key">threshold</span>: <span class="hl-num">0.1</span></code></pre>
+      </div>
+    </div>
+
+    <table>
+      <thead><tr><th>Field</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>mode</code></td><td><code>threshold</code></td><td>Comparison strategy</td></tr>
+        <tr><td><code>maxDiffPercent</code></td><td><code>1.0</code></td><td>Maximum allowed percentage of different pixels (threshold mode only)</td></tr>
+        <tr><td><code>threshold</code></td><td><code>0.1</code></td><td>Pixelmatch color sensitivity (0 = exact color match, 1 = very lenient)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Diff images</strong>
+      When a visual test fails, a diff image highlighting the differences is saved to <code>diffDir</code>. Different pixels are shown in red.
+    </div>
+  </section>
+
+  <!-- Screenshot Options -->
+  <section id="screenshot-options">
+    <h2>Screenshot Options</h2>
+    <table>
+      <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>fullPage</code></td><td>boolean</td><td><code>false</code></td><td>Capture the full scrollable page instead of just the viewport</td></tr>
+        <tr><td><code>selector</code></td><td>string</td><td><code>null</code></td><td>CSS selector to screenshot a specific element. Overrides <code>fullPage</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Examples</h4>
+    <pre><code><span class="hl-comment"># Viewport screenshot (default)</span>
+<span class="hl-key">screenshotOptions</span>: {}
+
+<span class="hl-comment"># Full page screenshot</span>
+<span class="hl-key">screenshotOptions</span>:
+  <span class="hl-key">fullPage</span>: <span class="hl-bool">true</span>
+
+<span class="hl-comment"># Element screenshot</span>
+<span class="hl-key">screenshotOptions</span>:
+  <span class="hl-key">selector</span>: <span class="hl-str">".dashboard-header"</span></code></pre>
+  </section>
+
+  <!-- Console Output -->
+  <section id="console-output">
+    <h2>Console Output</h2>
+    <p>The tool prints colored output to the terminal during execution:</p>
+    <pre><code style="color: #8b8fa3"><span style="color:#6cc">auto-e2e v1.0.0</span>
+
+<span style="color:#636e82">Starting server: npm run dev
+Waiting for http://localhost:4200 ...</span>
+<span style="color:#00b894">Server ready (2.3s)</span>
+
+<span style="font-weight:bold">Running 3 functional tests, 2 visual tests across 2 browsers</span>
+<span style="color:#636e82">Browsers: <span style="color:#6cc">chromium</span>, <span style="color:#6cc">firefox</span></span>
+
+<span style="color:#6cc;font-weight:bold">
+--- chromium ---
+</span>
+  <span style="font-weight:bold">[1/5] Homepage loads correctly</span>
+    <span style="color:#00b894">PASS</span>  element-exists: h1
+    <span style="color:#00b894">PASS</span>  text-contains: h1 -> "Welcome"
+    <span style="color:#00b894;font-weight:bold">PASSED</span> <span style="color:#636e82">(1.2s)</span>
+
+  <span style="font-weight:bold">[2/5] Login flow</span>
+    <span style="color:#00b894">PASS</span>  url-matches: /dashboard
+    <span style="color:#e17055">FAIL</span>  text-contains: ".welcome" expected "Hello" but got "Hi"
+    <span style="color:#e17055;font-weight:bold">FAILED</span> <span style="color:#636e82">(3.1s)</span>
+
+  <span style="font-weight:bold">[4/5] Homepage visual check</span>
+    <span style="color:#fdcb6e">BASELINE CREATED</span>  Baseline created at screenshots/baseline/chromium/homepage.png
+    <span style="color:#fdcb6e;font-weight:bold">BASELINE CREATED</span> <span style="color:#636e82">(0.8s)</span>
+
+<span style="color:#636e82">--- chromium done ---</span>
+
+<span style="color:#6cc;font-weight:bold">
+--- firefox ---
+</span>
+  <span style="font-weight:bold">[1/5] Homepage loads correctly</span>
+    <span style="color:#00b894">PASS</span>  element-exists: h1
+    <span style="color:#00b894">PASS</span>  text-contains: h1 -> "Welcome"
+    <span style="color:#00b894;font-weight:bold">PASSED</span> <span style="color:#636e82">(1.4s)</span>
+
+  <span style="font-weight:bold">...</span>
+
+<span style="color:#636e82">--- firefox done ---</span>
+
+<span style="color:#636e82">────────────────────────────────────────</span>
+Results: <span style="color:#00b894">8 passed</span>, <span style="color:#e17055">2 failed</span>, 10 total
+Duration: 16.4s
+Report saved to auto-e2e-results.json
+<span style="color:#636e82">────────────────────────────────────────</span></code></pre>
+  </section>
+
+  <!-- JSON Report -->
+  <section id="json-report">
+    <h2>JSON Report</h2>
+    <p>A structured JSON file is written after each run (default: <code>auto-e2e-results.json</code>).</p>
+    <pre><code>{
+  <span class="hl-key">"startedAt"</span>: <span class="hl-str">"2026-02-25T10:30:45.123Z"</span>,
+  <span class="hl-key">"finishedAt"</span>: <span class="hl-str">"2026-02-25T10:30:52.456Z"</span>,
+  <span class="hl-key">"durationMs"</span>: <span class="hl-num">7333</span>,
+  <span class="hl-key">"browsers"</span>: [<span class="hl-str">"chromium"</span>, <span class="hl-str">"firefox"</span>],
+  <span class="hl-key">"summary"</span>: {
+    <span class="hl-key">"total"</span>: <span class="hl-num">10</span>,
+    <span class="hl-key">"passed"</span>: <span class="hl-num">8</span>,
+    <span class="hl-key">"failed"</span>: <span class="hl-num">2</span>
+  },
+  <span class="hl-key">"tests"</span>: [
+    {
+      <span class="hl-key">"name"</span>: <span class="hl-str">"Homepage loads correctly"</span>,
+      <span class="hl-key">"type"</span>: <span class="hl-str">"functional"</span>,
+      <span class="hl-key">"browser"</span>: <span class="hl-str">"chromium"</span>,
+      <span class="hl-key">"path"</span>: <span class="hl-str">"/"</span>,
+      <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>,
+      <span class="hl-key">"durationMs"</span>: <span class="hl-num">1234</span>,
+      <span class="hl-key">"assertions"</span>: [
+        { <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>, <span class="hl-key">"message"</span>: <span class="hl-str">"element-exists: h1"</span> }
+      ],
+      <span class="hl-key">"error"</span>: <span class="hl-bool">null</span>
+    },
+    {
+      <span class="hl-key">"name"</span>: <span class="hl-str">"Homepage visual check"</span>,
+      <span class="hl-key">"type"</span>: <span class="hl-str">"visual"</span>,
+      <span class="hl-key">"browser"</span>: <span class="hl-str">"chromium"</span>,
+      <span class="hl-key">"path"</span>: <span class="hl-str">"/"</span>,
+      <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>,
+      <span class="hl-key">"durationMs"</span>: <span class="hl-num">890</span>,
+      <span class="hl-key">"visual"</span>: {
+        <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>,
+        <span class="hl-key">"diffPixels"</span>: <span class="hl-num">42</span>,
+        <span class="hl-key">"diffPercent"</span>: <span class="hl-num">0.05</span>,
+        <span class="hl-key">"baselinePath"</span>: <span class="hl-str">"/path/to/baseline/chromium/homepage.png"</span>,
+        <span class="hl-key">"currentPath"</span>: <span class="hl-str">"/path/to/current/chromium/homepage.png"</span>,
+        <span class="hl-key">"diffPath"</span>: <span class="hl-bool">null</span>,
+        <span class="hl-key">"message"</span>: <span class="hl-str">"0.05% pixels differ (threshold: 1.5%)"</span>
+      },
+      <span class="hl-key">"error"</span>: <span class="hl-bool">null</span>
+    }
+  ]
+}</code></pre>
+  </section>
+
+  <!-- Defaults -->
+  <section id="defaults">
+    <h2>Default Values Reference</h2>
+    <table>
+      <thead><tr><th>Setting</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td><code>app.startTimeout</code></td><td><code>30000</code> ms</td></tr>
+        <tr><td><code>app.browsers</code></td><td><code>["chromium"]</code></td></tr>
+        <tr><td><code>app.headless</code></td><td><code>true</code></td></tr>
+        <tr><td><code>app.viewport.width</code></td><td><code>1280</code> px</td></tr>
+        <tr><td><code>app.viewport.height</code></td><td><code>720</code> px</td></tr>
+        <tr><td><code>visualDefaults.baselineDir</code></td><td><code>"./screenshots/baseline"</code></td></tr>
+        <tr><td><code>visualDefaults.diffDir</code></td><td><code>"./screenshots/diff"</code></td></tr>
+        <tr><td><code>visualDefaults.currentDir</code></td><td><code>"./screenshots/current"</code></td></tr>
+        <tr><td><code>visualDefaults.threshold</code></td><td><code>0.1</code></td></tr>
+        <tr><td><code>visualDefaults.failOnMissingBaseline</code></td><td><code>false</code></td></tr>
+        <tr><td><code>comparison.mode</code></td><td><code>"threshold"</code></td></tr>
+        <tr><td><code>comparison.maxDiffPercent</code></td><td><code>1.0</code> %</td></tr>
+        <tr><td><code>wait-for-selector</code> timeout</td><td><code>5000</code> ms</td></tr>
+        <tr><td><code>--config</code> CLI flag</td><td><code>"auto-e2e.yml"</code></td></tr>
+        <tr><td><code>--output</code> CLI flag</td><td><code>"auto-e2e-results.json"</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Error Handling -->
+  <section id="error-handling">
+    <h2>Error Handling</h2>
+
+    <h3>Configuration Errors</h3>
+    <table>
+      <thead><tr><th>Scenario</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>Config file not found</td><td>Prints <code>"Config file not found: &lt;path&gt;"</code> and exits with code 1</td></tr>
+        <tr><td>Invalid YAML syntax</td><td>Prints <code>"Invalid YAML: &lt;details&gt;"</code> and exits with code 1</td></tr>
+        <tr><td>Schema validation failure</td><td>Prints specific error with field path (e.g. <code>"tests[0].assertions must be a non-empty array"</code>) and exits with code 1</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Server Errors</h3>
+    <table>
+      <thead><tr><th>Scenario</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>Server doesn't start in time</td><td>Prints timeout error with the last 20 lines of stderr for diagnostics, kills server, exits with code 1</td></tr>
+        <tr><td>Server process crashes</td><td>Detected by polling timeout, stderr captured in error message</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Browser Errors</h3>
+    <table>
+      <thead><tr><th>Scenario</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>Browser fails to launch</td><td>Prints error with hint: <code>"Run 'npx playwright install &lt;browser&gt;' to install browser binaries"</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Test Errors</h3>
+    <table>
+      <thead><tr><th>Scenario</th><th>Behavior</th></tr></thead>
+      <tbody>
+        <tr><td>Navigation failure</td><td>Test marked as FAILED with error message</td></tr>
+        <tr><td>Action fails (selector not found)</td><td>Test marked as FAILED, remaining actions and assertions skipped</td></tr>
+        <tr><td>Assertion fails</td><td>Assertion marked as FAILED, remaining assertions still evaluated</td></tr>
+        <tr><td>Baseline image missing</td><td>Auto-created (default) or test fails if <code>failOnMissingBaseline: true</code></td></tr>
+        <tr><td>Image dimension mismatch</td><td>Test FAILED: <code>"Dimension mismatch: baseline WxH vs current WxH"</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger">
+      <strong>Server cleanup guarantee</strong>
+      The dev server process is always killed when the tool exits, even on errors. A <code>finally</code> block and <code>SIGINT</code>/<code>SIGTERM</code> handlers ensure no orphan processes are left behind.
+    </div>
+  </section>
+
+  <!-- Exit Codes -->
+  <section id="exit-codes">
+    <h2>Exit Codes</h2>
+    <table>
+      <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code style="color: var(--green); font-weight: bold;">0</code></td><td>All tests passed (or baselines were created)</td></tr>
+        <tr><td><code style="color: var(--red); font-weight: bold;">1</code></td><td>Any test failed, config error, server error, or browser error</td></tr>
+      </tbody>
+    </table>
+    <p>This makes the tool CI/CD-friendly &mdash; pipelines will detect failures automatically.</p>
+  </section>
+
+  <!-- Architecture -->
+  <section id="architecture">
+    <h2>Architecture</h2>
+    <p>The tool is composed of 9 focused modules with clear separation of concerns:</p>
+
+    <table>
+      <thead><tr><th>Module</th><th>Responsibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>index.js</code></td><td>CLI entry point &mdash; parses args, wires modules, manages lifecycle</td></tr>
+        <tr><td><code>config-loader.js</code></td><td>Reads YAML, applies defaults, validates schema, resolves paths</td></tr>
+        <tr><td><code>schema.js</code></td><td>Defines and enforces all validation rules for the config</td></tr>
+        <tr><td><code>server-manager.js</code></td><td>Spawns dev server, polls URL, kills process (cross-platform)</td></tr>
+        <tr><td><code>test-runner.js</code></td><td>Loops over each browser, launches instances, iterates tests, collects results</td></tr>
+        <tr><td><code>action-executor.js</code></td><td>Maps YAML action definitions to Playwright API calls</td></tr>
+        <tr><td><code>assertion-engine.js</code></td><td>Evaluates assertions against current page state</td></tr>
+        <tr><td><code>visual-comparator.js</code></td><td>Screenshot capture, baseline management, pixelmatch diffing</td></tr>
+        <tr><td><code>reporter.js</code></td><td>Colored console output and JSON report generation</td></tr>
+        <tr><td><code>utils.js</code></td><td>Shared helpers: delay, URL polling, directory creation</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Design Decisions</h3>
+    <div class="card">
+      <h4>CommonJS, not ESM</h4>
+      <p>All code uses <code>require()</code> / <code>module.exports</code>. This ensures compatibility when dropped into any project regardless of its module system. Dependencies like <code>pixelmatch</code> (pinned to 5.3.0) and <code>chalk</code> (^4.x) are specifically chosen for their CJS compatibility.</p>
+    </div>
+    <div class="card">
+      <h4>Playwright as a library</h4>
+      <p>The tool uses <code>playwright</code> directly, not <code>@playwright/test</code>. This gives full control over the browser lifecycle and avoids coupling to Playwright's test runner conventions.</p>
+    </div>
+    <div class="card">
+      <h4>Cross-platform process management</h4>
+      <p>On Windows, <code>taskkill /T /F</code> kills the entire process tree. On Unix, process groups (<code>detached: true</code> + <code>process.kill(-pid)</code>) ensure all child processes are terminated.</p>
+    </div>
+  </section>
+
+  <footer style="margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--text-dim); font-size: 13px;">
+    auto-e2e v1.0.0 &middot; Powered by Playwright &amp; pixelmatch
+  </footer>
+
+</div>
+
+</body>
+</html>
