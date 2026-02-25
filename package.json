@@ -7,8 +7,9 @@
     "auto-e2e": "./index.js"
   },
   "scripts": {
-    "test": "node index.js",
-    "test:config": "node index.js --config"
+    "start": "node index.js",
+    "start:config": "node index.js --config",
+    "test": "node --test tests/*.test.js"
   },
   "dependencies": {
     "playwright": "^1.52.0",
@@ -17,6 +18,7 @@
     "pngjs": "^7.0.0",
     "chalk": "^4.1.2"
   },
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=18.0.0"
   }

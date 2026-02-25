@@ -6,38 +6,28 @@ A portable, YAML-driven end-to-end testing framework powered by Playwright. Drop
 
 ---
 
-## Installation
-
-### 1. Copy into your project
-
-Copy the `auto-e2e` folder into the root of your frontend project (Angular, Vue, React, or any framework).
-
-### 2. Install dependencies
-
-```bash
-cd auto-e2e
-npm install
-```
-
-### 3. Install Playwright browsers
-
-```bash
-# Install only chromium (default)
-npx playwright install chromium
-
-# Or install all browsers you plan to test with
-npx playwright install chromium firefox webkit
-```
-
-### 4. Create your config
-
-Copy `auto-e2e.sample.yml` to your project root and rename it to `auto-e2e.yml`. Edit it to match your app.
-
----
-
 ## Quick Start
 
-Here's a minimal `auto-e2e.yml` to get started:
+### 1. Copy the `auto-e2e` folder into your project
+
+### 2. Run setup
+
+```bash
+node auto-e2e/setup.js
+```
+
+This single command will:
+- Install all npm dependencies
+- Install Playwright Chromium browser
+- Generate a starter `auto-e2e.yml` in your project root
+
+To install additional browsers, pass them as arguments:
+
+```bash
+node auto-e2e/setup.js chromium firefox webkit
+```
+
+### 3. Edit `auto-e2e.yml` to match your app
 
 ```yaml
 app:
@@ -52,11 +42,25 @@ tests:
         selector: "h1"
 ```
 
-Run it:
+### 4. Run
 
 ```bash
 node auto-e2e/index.js
 ```
+
+---
+
+## Manual Installation
+
+If you prefer to set up manually instead of using `setup.js`:
+
+```bash
+cd auto-e2e
+npm install
+npx playwright install chromium
+```
+
+Then copy `auto-e2e.sample.yml` to your project root as `auto-e2e.yml`.
 
 > **What happens:** The tool starts your dev server, waits for it to be ready, then for each browser in the `browsers` list it opens a headless instance, navigates to each test path, executes actions, evaluates assertions, and prints results. The server is automatically killed when done.
 
@@ -73,18 +77,26 @@ Load YAML → Start Server → Poll URL → For each browser → Launch & Run Te
 ```
 auto-e2e/
   package.json
-  index.js                    ← CLI entry point
-  auto-e2e.sample.yml         ← example config
+  index.js                      ← CLI entry point
+  setup.js                      ← one-command setup script
+  auto-e2e.sample.yml           ← example config
   src/
-    config-loader.js          ← parse YAML, validate, apply defaults
-    schema.js                 ← validation rules
-    server-manager.js         ← start/stop dev server
-    test-runner.js            ← orchestrate Playwright
-    action-executor.js        ← click, type, hover…
-    assertion-engine.js       ← element-exists, text-contains…
-    visual-comparator.js      ← screenshot & pixelmatch
-    reporter.js               ← console output & JSON report
-    utils.js                  ← helpers (delay, pollUrl, ensureDir)
+    config-loader.js            ← parse YAML, validate, apply defaults
+    schema.js                   ← validation rules
+    server-manager.js           ← start/stop dev server
+    test-runner.js              ← orchestrate Playwright
+    action-executor.js          ← click, type, hover…
+    assertion-engine.js         ← element-exists, text-contains…
+    visual-comparator.js        ← screenshot & pixelmatch
+    reporter.js                 ← console output & JSON report
+    utils.js                    ← helpers (delay, pollUrl, ensureDir)
+  tests/
+    schema.test.js              ← config validation tests
+    config-loader.test.js       ← defaults & normalization tests
+    action-executor.test.js     ← action delegation tests
+    assertion-engine.test.js    ← assertion evaluation tests
+    reporter.test.js            ← JSON report tests
+    utils.test.js               ← utility function tests
 ```
 
 ---
@@ -700,11 +712,12 @@ This makes the tool CI/CD-friendly — pipelines will detect failures automatica
 
 ## Architecture
 
-The tool is composed of 9 focused modules with clear separation of concerns:
+The tool is composed of focused modules with clear separation of concerns:
 
 | Module | Responsibility |
 |---|---|
 | `index.js` | CLI entry point — parses args, wires modules, manages lifecycle |
+| `setup.js` | One-command setup — installs deps, Playwright browsers, generates starter config |
 | `config-loader.js` | Reads YAML, applies defaults, validates schema, resolves paths |
 | `schema.js` | Defines and enforces all validation rules for the config |
 | `server-manager.js` | Spawns dev server, polls URL, kills process (cross-platform) |
@@ -714,6 +727,17 @@ The tool is composed of 9 focused modules with clear separation of concerns:
 | `visual-comparator.js` | Screenshot capture, baseline management, pixelmatch diffing |
 | `reporter.js` | Colored console output and JSON report generation |
 | `utils.js` | Shared helpers: delay, URL polling, directory creation |
+
+### Unit Tests
+
+The project includes 80 unit tests covering the critical modules. Run them with:
+
+```bash
+cd auto-e2e
+npm test
+```
+
+Tests use Node.js built-in `node:test` runner — no extra dependencies needed.
 
 ### Design Decisions
 

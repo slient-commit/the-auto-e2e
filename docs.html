@@ -446,22 +446,22 @@
         <p>Copy the <code>auto-e2e</code> folder into the root of your frontend project (Angular, Vue, React, or any framework).</p>
       </div>
       <div class="step">
-        <h4>Install dependencies</h4>
-        <pre><code>cd auto-e2e
-npm install</code></pre>
+        <h4>Run setup</h4>
+        <pre><code>node auto-e2e/setup.js</code></pre>
+        <p>This single command installs all dependencies, installs Playwright Chromium, and generates a starter <code>auto-e2e.yml</code> in your project root.</p>
+        <p>To install additional browsers, pass them as arguments:</p>
+        <pre><code>node auto-e2e/setup.js chromium firefox webkit</code></pre>
       </div>
       <div class="step">
-        <h4>Install Playwright browsers</h4>
-        <pre><code><span class="hl-comment"># Install only chromium (default)</span>
-npx playwright install chromium
+        <h4>Edit your config &amp; run</h4>
+        <p>Edit <code>auto-e2e.yml</code> to match your app, then run:</p>
+        <pre><code>node auto-e2e/index.js</code></pre>
+      </div>
+    </div>
 
-<span class="hl-comment"># Or install all browsers you plan to test with</span>
-npx playwright install chromium firefox webkit</code></pre>
-      </div>
-      <div class="step">
-        <h4>Create your config</h4>
-        <p>Copy <code>auto-e2e.sample.yml</code> to your project root and rename it to <code>auto-e2e.yml</code>. Edit it to match your app.</p>
-      </div>
+    <div class="callout">
+      <strong>Manual setup</strong>
+      If you prefer to set up manually: <code>cd auto-e2e &amp;&amp; npm install &amp;&amp; npx playwright install chromium</code>, then copy <code>auto-e2e.sample.yml</code> to your project root as <code>auto-e2e.yml</code>.
     </div>
   </section>
 
@@ -513,6 +513,7 @@ npx playwright install chromium firefox webkit</code></pre>
       <span class="folder">auto-e2e/</span><br>
       &nbsp;&nbsp;<span class="file">package.json</span><br>
       &nbsp;&nbsp;<span class="file">index.js</span> <span class="desc">&larr; CLI entry point</span><br>
+      &nbsp;&nbsp;<span class="file">setup.js</span> <span class="desc">&larr; one-command setup script</span><br>
       &nbsp;&nbsp;<span class="file">auto-e2e.sample.yml</span> <span class="desc">&larr; example config</span><br>
       &nbsp;&nbsp;<span class="folder">src/</span><br>
       &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">config-loader.js</span> <span class="desc">&larr; parse YAML, validate, apply defaults</span><br>
@@ -524,6 +525,13 @@ npx playwright install chromium firefox webkit</code></pre>
       &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">visual-comparator.js</span> <span class="desc">&larr; screenshot &amp; pixelmatch</span><br>
       &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">reporter.js</span> <span class="desc">&larr; console output &amp; JSON report</span><br>
       &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">utils.js</span> <span class="desc">&larr; helpers (delay, pollUrl, ensureDir)</span><br>
+      &nbsp;&nbsp;<span class="folder">tests/</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">schema.test.js</span> <span class="desc">&larr; config validation tests</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">config-loader.test.js</span> <span class="desc">&larr; defaults &amp; normalization tests</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">action-executor.test.js</span> <span class="desc">&larr; action delegation tests</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">assertion-engine.test.js</span> <span class="desc">&larr; assertion evaluation tests</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">reporter.test.js</span> <span class="desc">&larr; JSON report tests</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="file">utils.test.js</span> <span class="desc">&larr; utility function tests</span><br>
     </div>
   </section>
 
@@ -1140,12 +1148,13 @@ Report saved to auto-e2e-results.json
   <!-- Architecture -->
   <section id="architecture">
     <h2>Architecture</h2>
-    <p>The tool is composed of 9 focused modules with clear separation of concerns:</p>
+    <p>The tool is composed of focused modules with clear separation of concerns:</p>
 
     <table>
       <thead><tr><th>Module</th><th>Responsibility</th></tr></thead>
       <tbody>
         <tr><td><code>index.js</code></td><td>CLI entry point &mdash; parses args, wires modules, manages lifecycle</td></tr>
+        <tr><td><code>setup.js</code></td><td>One-command setup &mdash; installs deps, Playwright browsers, generates starter config</td></tr>
         <tr><td><code>config-loader.js</code></td><td>Reads YAML, applies defaults, validates schema, resolves paths</td></tr>
         <tr><td><code>schema.js</code></td><td>Defines and enforces all validation rules for the config</td></tr>
         <tr><td><code>server-manager.js</code></td><td>Spawns dev server, polls URL, kills process (cross-platform)</td></tr>
@@ -1157,6 +1166,12 @@ Report saved to auto-e2e-results.json
         <tr><td><code>utils.js</code></td><td>Shared helpers: delay, URL polling, directory creation</td></tr>
       </tbody>
     </table>
+
+    <h3>Unit Tests</h3>
+    <p>The project includes 80 unit tests covering the critical modules. Run them with:</p>
+    <pre><code>cd auto-e2e
+npm test</code></pre>
+    <p>Tests use Node.js built-in <code>node:test</code> runner &mdash; no extra dependencies needed.</p>
 
     <h3>Design Decisions</h3>
     <div class="card">
