@@ -1,43 +1,55 @@
-async function evaluate(page, assertion) {
+const { resolveVariables } = require('./utils');
+
+function resolveAssertion(assertion, variables) {
+  if (!variables || Object.keys(variables).length === 0) return assertion;
+  const resolved = { ...assertion };
+  if (resolved.selector) resolved.selector = resolveVariables(resolved.selector, variables);
+  if (resolved.expected !== undefined && typeof resolved.expected === 'string') resolved.expected = resolveVariables(resolved.expected, variables);
+  if (resolved.attribute) resolved.attribute = resolveVariables(resolved.attribute, variables);
+  return resolved;
+}
+
+async function evaluate(page, assertion, variables = {}) {
+  const resolved = resolveAssertion(assertion, variables);
   try {
-    switch (assertion.type) {
+    switch (resolved.type) {
       case 'element-exists':
-        return await checkElementExists(page, assertion);
+        return await checkElementExists(page, resolved);
 
       case 'element-not-exists':
-        return await checkElementNotExists(page, assertion);
+        return await checkElementNotExists(page, resolved);
 
       case 'element-visible':
-        return await checkElementVisible(page, assertion);
+        return await checkElementVisible(page, resolved);
 
       case 'text-contains':
-        return await checkTextContains(page, assertion);
+        return await checkTextContains(page, resolved);
 
       case 'text-equals':
-        return await checkTextEquals(page, assertion);
+        return await checkTextEquals(page, resolved);
 
       case 'url-matches':
-        return checkUrlMatches(page, assertion);
+        return checkUrlMatches(page, resolved);
 
       case 'title-contains':
-        return await checkTitleContains(page, assertion);
+        return await checkTitleContains(page, resolved);
 
       case 'attribute-equals':
-        return await checkAttributeEquals(page, assertion);
+        return await checkAttributeEquals(page, resolved);
 
       case 'element-count':
-        return await checkElementCount(page, assertion);
+        return await checkElementCount(page, resolved);
 
       default:
         return {
           status: 'failed',
-          message: `Unknown assertion type: ${assertion.type}`,
+          message: `Unknown assertion type: ${resolved.type}`,
         };
     }
   } catch (err) {
     return {
       status: 'failed',
-      message: `${assertion.type}: ${assertion.selector || ''} - ${err.message}`,
+      message: `${resolved.type}: ${resolved.selector || ''} - ${err.message}`,
     };
   }
 }

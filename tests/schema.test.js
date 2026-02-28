@@ -220,4 +220,155 @@ describe('schema.validate', () => {
     cfg.app.startTimeout = -1;
     assert.throws(() => validate(cfg), /startTimeout must be a positive number/);
   });
+
+  // ── Multi-step (long) tests ────────────────────────────────
+
+  it('accepts a valid multi-step test', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/login',
+        steps: [
+          { name: 'Login', actions: [{ action: 'click', selector: '#btn' }], assertions: [{ type: 'url-matches', expected: '/dashboard' }] },
+          { name: 'Fill form', assertions: [{ type: 'element-exists', selector: '#form' }] },
+        ],
+      }],
+    });
+    assert.doesNotThrow(() => validate(cfg));
+  });
+
+  it('rejects multi-step test with top-level actions', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/login',
+        actions: [{ action: 'click', selector: '#btn' }],
+        steps: [
+          { name: 'Step1', assertions: [{ type: 'element-exists', selector: 'h1' }] },
+        ],
+      }],
+    });
+    assert.throws(() => validate(cfg), /cannot have both "steps" and top-level "actions"/);
+  });
+
+  it('rejects multi-step test with top-level assertions', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/login',
+        assertions: [{ type: 'element-exists', selector: 'h1' }],
+        steps: [
+          { name: 'Step1', assertions: [{ type: 'element-exists', selector: 'h1' }] },
+        ],
+      }],
+    });
+    assert.throws(() => validate(cfg), /cannot have both "steps" and top-level "assertions"/);
+  });
+
+  it('rejects step missing name', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/',
+        steps: [
+          { assertions: [{ type: 'element-exists', selector: 'h1' }] },
+        ],
+      }],
+    });
+    assert.throws(() => validate(cfg), /steps\[0\]\.name is required/);
+  });
+
+  it('rejects step with empty assertions', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/',
+        steps: [
+          { name: 'Step1', assertions: [] },
+        ],
+      }],
+    });
+    assert.throws(() => validate(cfg), /steps\[0\]\.assertions must be a non-empty array/);
+  });
+
+  it('rejects step with invalid action', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/',
+        steps: [
+          { name: 'Step1', actions: [{ action: 'double-click', selector: '#x' }], assertions: [{ type: 'element-exists', selector: 'h1' }] },
+        ],
+      }],
+    });
+    assert.throws(() => validate(cfg), /is not valid/);
+  });
+
+  it('rejects step with invalid assertion', () => {
+    const cfg = validConfig({
+      tests: [{
+        name: 'Multi', path: '/',
+        steps: [
+          { name: 'Step1', assertions: [{ type: 'custom-check' }] },
+        ],
+      }],
+    });
+    assert.throws(() => validate(cfg), /is not valid/);
+  });
+
+  // ── goto / capture actions ─────────────────────────────
+
+  it('accepts goto action with url', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'goto', url: '/items/42' }];
+    assert.doesNotThrow(() => validate(cfg));
+  });
+
+  it('rejects goto action missing url', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'goto' }];
+    assert.throws(() => validate(cfg), /url is required for "goto"/);
+  });
+
+  it('accepts capture-text action', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-text', selector: '.id', variable: 'myId' }];
+    assert.doesNotThrow(() => validate(cfg));
+  });
+
+  it('rejects capture-text missing variable', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-text', selector: '.id' }];
+    assert.throws(() => validate(cfg), /variable is required for "capture-text"/);
+  });
+
+  it('rejects capture-text missing selector', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-text', variable: 'x' }];
+    assert.throws(() => validate(cfg), /selector is required for "capture-text"/);
+  });
+
+  it('accepts capture-attribute action', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-attribute', selector: 'a', attribute: 'href', variable: 'link' }];
+    assert.doesNotThrow(() => validate(cfg));
+  });
+
+  it('rejects capture-attribute missing attribute', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-attribute', selector: 'a', variable: 'link' }];
+    assert.throws(() => validate(cfg), /attribute is required for "capture-attribute"/);
+  });
+
+  it('accepts capture-url action', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-url', pattern: '/items/:id', variable: 'id' }];
+    assert.doesNotThrow(() => validate(cfg));
+  });
+
+  it('rejects capture-url missing pattern', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-url', variable: 'id' }];
+    assert.throws(() => validate(cfg), /pattern is required for "capture-url"/);
+  });
+
+  it('rejects capture-url missing variable', () => {
+    const cfg = validConfig();
+    cfg.tests[0].actions = [{ action: 'capture-url', pattern: '/items/:id' }];
+    assert.throws(() => validate(cfg), /variable is required for "capture-url"/);
+  });
 });

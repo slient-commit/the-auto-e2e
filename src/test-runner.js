@@ -42,52 +42,12 @@ async function run(config) {
       reporter.printTestStart(testIndex, totalInBrowser, test.name);
 
       const page = await context.newPage();
-      const testResult = {
-        name: test.name,
-        type: 'functional',
-        browser: browserName,
-        path: test.path,
-        status: 'passed',
-        durationMs: 0,
-        assertions: [],
-        error: null,
-      };
 
-      try {
-        await page.goto(`${app.url}${test.path}`, { waitUntil: 'domcontentloaded' });
-
-        // Execute actions
-        let actionFailed = false;
-        if (test.actions) {
-          for (const action of test.actions) {
-            try {
-              await actionExecutor.execute(page, action);
-            } catch (err) {
-              const msg = `Action "${action.action}" failed: ${err.message}`;
-              reporter.printActionError(msg);
-              testResult.status = 'failed';
-              testResult.error = msg;
-              actionFailed = true;
-              break;
-            }
-          }
-        }
-
-        // Evaluate assertions (only if actions succeeded)
-        if (!actionFailed) {
-          for (const assertion of test.assertions) {
-            const result = await assertionEngine.evaluate(page, assertion);
-            testResult.assertions.push(result);
-            reporter.printAssertionResult(result);
-            if (result.status === 'failed') {
-              testResult.status = 'failed';
-            }
-          }
-        }
-      } catch (err) {
-        testResult.status = 'failed';
-        testResult.error = `Navigation failed: ${err.message}`;
-        reporter.printActionError(testResult.error);
+      let testResult;
+      if (test.steps) {
+        testResult = await runMultiStepTest(page, test, app, browserName);
+      } else {
+        testResult = await runStandardTest(page, test, app, browserName);
       }
 
       await page.close();
@@ -121,7 +81,7 @@ async function run(config) {
         if (test.actions) {
           for (const action of test.actions) {
             try {
-              await actionExecutor.execute(page, action);
+              await actionExecutor.execute(page, action, {}, app.url);
             } catch (err) {
               const msg = `Action "${action.action}" failed: ${err.message}`;
               reporter.printActionError(msg);
@@ -176,6 +136,136 @@ async function run(config) {
     summary: { total, passed, failed },
     tests: allResults,
   };
+}
+
+async function runStandardTest(page, test, app, browserName) {
+  const testResult = {
+    name: test.name,
+    type: 'functional',
+    browser: browserName,
+    path: test.path,
+    status: 'passed',
+    durationMs: 0,
+    assertions: [],
+    error: null,
+  };
+
+  const variables = {};
+
+  try {
+    await page.goto(`${app.url}${test.path}`, { waitUntil: 'domcontentloaded' });
+
+    // Execute actions
+    let actionFailed = false;
+    if (test.actions) {
+      for (const action of test.actions) {
+        try {
+          await actionExecutor.execute(page, action, variables, app.url);
+        } catch (err) {
+          const msg = `Action "${action.action}" failed: ${err.message}`;
+          reporter.printActionError(msg);
+          testResult.status = 'failed';
+          testResult.error = msg;
+          actionFailed = true;
+          break;
+        }
+      }
+    }
+
+    // Evaluate assertions (only if actions succeeded)
+    if (!actionFailed) {
+      for (const assertion of test.assertions) {
+        const result = await assertionEngine.evaluate(page, assertion, variables);
+        testResult.assertions.push(result);
+        reporter.printAssertionResult(result);
+        if (result.status === 'failed') {
+          testResult.status = 'failed';
+        }
+      }
+    }
+  } catch (err) {
+    testResult.status = 'failed';
+    testResult.error = `Navigation failed: ${err.message}`;
+    reporter.printActionError(testResult.error);
+  }
+
+  return testResult;
+}
+
+async function runMultiStepTest(page, test, app, browserName) {
+  const testResult = {
+    name: test.name,
+    type: 'functional',
+    browser: browserName,
+    path: test.path,
+    status: 'passed',
+    durationMs: 0,
+    steps: [],
+    error: null,
+  };
+
+  const variables = {};
+
+  try {
+    await page.goto(`${app.url}${test.path}`, { waitUntil: 'domcontentloaded' });
+
+    for (let i = 0; i < test.steps.length; i++) {
+      const step = test.steps[i];
+      reporter.printStepStart(i, test.steps.length, step.name);
+
+      const stepResult = {
+        name: step.name,
+        status: 'passed',
+        assertions: [],
+        error: null,
+      };
+
+      // Execute step actions
+      let actionFailed = false;
+      if (step.actions) {
+        for (const action of step.actions) {
+          try {
+            await actionExecutor.execute(page, action, variables, app.url);
+          } catch (err) {
+            const msg = `Action "${action.action}" failed: ${err.message}`;
+            reporter.printActionError(msg);
+            stepResult.status = 'failed';
+            stepResult.error = msg;
+            actionFailed = true;
+            break;
+          }
+        }
+      }
+
+      // Evaluate step assertions (only if actions succeeded)
+      if (!actionFailed) {
+        for (const assertion of step.assertions) {
+          const result = await assertionEngine.evaluate(page, assertion, variables);
+          stepResult.assertions.push(result);
+          reporter.printAssertionResult(result);
+          if (result.status === 'failed') {
+            stepResult.status = 'failed';
+          }
+        }
+      }
+
+      reporter.printStepEnd(stepResult.status);
+      testResult.steps.push(stepResult);
+
+      // Stop executing further steps if this step failed
+      if (stepResult.status === 'failed') {
+        testResult.status = 'failed';
+        testResult.error = `Step "${step.name}" failed`;
+        break;
+      }
+    }
+  } catch (err) {
+    testResult.status = 'failed';
+    testResult.error = `Navigation failed: ${err.message}`;
+    reporter.printActionError(testResult.error);
+  }
+
+  return testResult;
 }
 
 module.exports = { run };

@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
-const { delay, ensureDir, resolveFromConfig } = require('../src/utils');
+const { delay, ensureDir, resolveFromConfig, resolveVariables } = require('../src/utils');
 
 describe('utils.delay', () => {
   it('resolves after approximately the given ms', async () => {
@@ -47,5 +47,28 @@ describe('utils.resolveFromConfig', () => {
     const abs = path.resolve('/tmp/baselines');
     const result = resolveFromConfig('/some/dir', abs);
     assert.equal(result, abs);
+  });
+});
+
+describe('utils.resolveVariables', () => {
+  it('replaces placeholders with variable values', () => {
+    assert.equal(resolveVariables('/items/{{id}}/edit', { id: '42' }), '/items/42/edit');
+  });
+
+  it('replaces multiple placeholders', () => {
+    assert.equal(resolveVariables('{{a}}-{{b}}', { a: 'hello', b: 'world' }), 'hello-world');
+  });
+
+  it('leaves unknown placeholders unchanged', () => {
+    assert.equal(resolveVariables('{{unknown}}', {}), '{{unknown}}');
+  });
+
+  it('returns string unchanged when no placeholders', () => {
+    assert.equal(resolveVariables('/items/list', { id: '42' }), '/items/list');
+  });
+
+  it('returns non-string values unchanged', () => {
+    assert.equal(resolveVariables(null, { id: '42' }), null);
+    assert.equal(resolveVariables(undefined, {}), undefined);
   });
 });

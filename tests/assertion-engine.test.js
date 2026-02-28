@@ -193,4 +193,20 @@ describe('assertion-engine.evaluate', () => {
       assert.match(result.message, /Page crashed/);
     });
   });
+
+  // ── Variable interpolation ───────────────────────────
+
+  describe('variable interpolation', () => {
+    it('interpolates variables in expected field', async () => {
+      const page = mockPage({ url: () => 'http://localhost:4200/items/42' });
+      const result = await evaluate(page, { type: 'url-matches', expected: '/items/{{id}}' }, { id: '42' });
+      assert.equal(result.status, 'passed');
+    });
+
+    it('interpolates variables in selector field', async () => {
+      const page = mockPage({ $: async (sel) => sel === '#item-42' ? {} : null });
+      const result = await evaluate(page, { type: 'element-exists', selector: '#item-{{id}}' }, { id: '42' });
+      assert.equal(result.status, 'passed');
+    });
+  });
 });

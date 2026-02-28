@@ -2,7 +2,8 @@ const VALID_BROWSERS = ['chromium', 'firefox', 'webkit'];
 const VALID_ACTIONS = [
   'click', 'type', 'hover', 'select', 'scroll',
   'wait', 'wait-for-selector', 'wait-for-navigation',
-  'press', 'clear'
+  'press', 'clear', 'goto',
+  'capture-text', 'capture-attribute', 'capture-url'
 ];
 const VALID_ASSERTION_TYPES = [
   'element-exists', 'element-not-exists', 'element-visible',
@@ -97,6 +98,22 @@ function validateTest(test, index) {
     throw new Error(`Config error: ${prefix}.path is required and must be a string`);
   }
 
+  const hasSteps = Array.isArray(test.steps) && test.steps.length > 0;
+  const hasAssertions = Array.isArray(test.assertions) && test.assertions.length > 0;
+
+  // Multi-step test: must not have top-level actions or assertions
+  if (hasSteps) {
+    if (test.actions) {
+      throw new Error(`Config error: ${prefix} cannot have both "steps" and top-level "actions"`);
+    }
+    if (test.assertions) {
+      throw new Error(`Config error: ${prefix} cannot have both "steps" and top-level "assertions"`);
+    }
+    test.steps.forEach((step, j) => validateStep(step, `${prefix}.steps[${j}]`));
+    return;
+  }
+
+  // Standard test: must have assertions
   if (test.actions) {
     if (!Array.isArray(test.actions)) {
       throw new Error(`Config error: ${prefix}.actions must be an array`);
@@ -104,10 +121,28 @@ function validateTest(test, index) {
     test.actions.forEach((action, j) => validateAction(action, `${prefix}.actions[${j}]`));
   }
 
-  if (!test.assertions || !Array.isArray(test.assertions) || test.assertions.length === 0) {
+  if (!hasAssertions) {
     throw new Error(`Config error: ${prefix}.assertions must be a non-empty array`);
   }
   test.assertions.forEach((assertion, j) => validateAssertion(assertion, `${prefix}.assertions[${j}]`));
+}
+
+function validateStep(step, prefix) {
+  if (!step.name || typeof step.name !== 'string') {
+    throw new Error(`Config error: ${prefix}.name is required and must be a string`);
+  }
+
+  if (step.actions) {
+    if (!Array.isArray(step.actions)) {
+      throw new Error(`Config error: ${prefix}.actions must be an array`);
+    }
+    step.actions.forEach((action, j) => validateAction(action, `${prefix}.actions[${j}]`));
+  }
+
+  if (!step.assertions || !Array.isArray(step.assertions) || step.assertions.length === 0) {
+    throw new Error(`Config error: ${prefix}.assertions must be a non-empty array`);
+  }
+  step.assertions.forEach((assertion, j) => validateAssertion(assertion, `${prefix}.assertions[${j}]`));
 }
 
 function validateAction(action, prefix) {
@@ -144,6 +179,22 @@ function validateAction(action, prefix) {
     case 'press':
       if (!action.selector) throw new Error(`Config error: ${prefix}.selector is required for "press"`);
       if (!action.key) throw new Error(`Config error: ${prefix}.key is required for "press"`);
+      break;
+    case 'goto':
+      if (!action.url || typeof action.url !== 'string') throw new Error(`Config error: ${prefix}.url is required for "goto" and must be a string`);
+      break;
+    case 'capture-text':
+      if (!action.selector) throw new Error(`Config error: ${prefix}.selector is required for "capture-text"`);
+      if (!action.variable || typeof action.variable !== 'string') throw new Error(`Config error: ${prefix}.variable is required for "capture-text" and must be a string`);
+      break;
+    case 'capture-attribute':
+      if (!action.selector) throw new Error(`Config error: ${prefix}.selector is required for "capture-attribute"`);
+      if (!action.attribute) throw new Error(`Config error: ${prefix}.attribute is required for "capture-attribute"`);
+      if (!action.variable || typeof action.variable !== 'string') throw new Error(`Config error: ${prefix}.variable is required for "capture-attribute" and must be a string`);
+      break;
+    case 'capture-url':
+      if (!action.pattern || typeof action.pattern !== 'string') throw new Error(`Config error: ${prefix}.pattern is required for "capture-url" and must be a string`);
+      if (!action.variable || typeof action.variable !== 'string') throw new Error(`Config error: ${prefix}.variable is required for "capture-url" and must be a string`);
       break;
   }
 }

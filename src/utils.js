@@ -41,4 +41,11 @@ function resolveFromConfig(configDir, relativePath) {
   return path.resolve(configDir, relativePath);
 }
 
-module.exports = { delay, pollUrl, ensureDir, resolveFromConfig };
+function resolveVariables(str, variables) {
+  if (!str || typeof str !== 'string' || !variables) return str;
+  return str.replace(/\{\{(\w+)\}\}/g, (match, name) => {
+    return variables[name] !== undefined ? variables[name] : match;
+  });
+}
+
+module.exports = { delay, pollUrl, ensureDir, resolveFromConfig, resolveVariables };

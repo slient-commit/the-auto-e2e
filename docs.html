@@ -400,7 +400,9 @@
 
     <div class="nav-section">Tests</div>
     <a href="#functional-tests">Functional Tests</a>
+    <a href="#multi-step-tests">Multi-Step Tests</a>
     <a href="#actions">Actions</a>
+    <a href="#variables">Variable Interpolation</a>
     <a href="#assertions">Assertions</a>
 
     <div class="nav-section">Visual Regression</div>
@@ -695,14 +697,127 @@ node auto-e2e/index.js --config ci.yml --output reports/e2e.json</code></pre>
         <tr><td><code>name</code></td><td><span class="tag required">required</span></td><td>Descriptive name shown in output</td></tr>
         <tr><td><code>path</code></td><td><span class="tag required">required</span></td><td>URL path appended to <code>app.url</code></td></tr>
         <tr><td><code>actions</code></td><td><span class="tag optional">optional</span></td><td>Sequence of browser actions to perform</td></tr>
-        <tr><td><code>assertions</code></td><td><span class="tag required">required</span></td><td>Non-empty array of assertions to evaluate</td></tr>
+        <tr><td><code>assertions</code></td><td><span class="tag required">required*</span></td><td>Non-empty array of assertions to evaluate</td></tr>
+        <tr><td><code>steps</code></td><td><span class="tag optional">optional*</span></td><td>Array of sequential step blocks (see <a href="#multi-step-tests" style="color: var(--accent-light)">Multi-Step Tests</a>)</td></tr>
       </tbody>
     </table>
+
+    <div class="callout">
+      <strong>*steps vs assertions</strong>
+      A test must have <strong>either</strong> <code>assertions</code> (standard test) <strong>or</strong> <code>steps</code> (multi-step test) &mdash; not both. When using <code>steps</code>, top-level <code>actions</code> and <code>assertions</code> are not allowed.
+    </div>
 
     <div class="callout warn">
       <strong>Behavior on failure</strong>
       If an <strong>action</strong> fails, remaining actions and all assertions are skipped&mdash;the test is marked failed immediately. If an <strong>assertion</strong> fails, remaining assertions still run to give a full picture.
     </div>
+  </section>
+
+  <!-- Multi-Step Tests -->
+  <section id="multi-step-tests">
+    <h2>Multi-Step Tests</h2>
+    <p>Multi-step tests run multiple blocks of actions and assertions on the <strong>same browser page</strong>, preserving session state (cookies, tokens, localStorage) between steps. Ideal for flows that depend on authentication or sequential state changes.</p>
+    <p>Use <code>steps</code> instead of top-level <code>actions</code> and <code>assertions</code>:</p>
+
+    <pre><code><span class="hl-key">tests</span>:
+  - <span class="hl-key">name</span>: <span class="hl-str">"Login and submit a form"</span>
+    <span class="hl-key">path</span>: <span class="hl-str">"/login"</span>
+    <span class="hl-key">steps</span>:
+      - <span class="hl-key">name</span>: <span class="hl-str">"Login"</span>
+        <span class="hl-key">actions</span>:
+          - <span class="hl-key">action</span>: <span class="hl-str">type</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#email"</span>
+            <span class="hl-key">value</span>: <span class="hl-str">"user@example.com"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">type</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#password"</span>
+            <span class="hl-key">value</span>: <span class="hl-str">"secret123"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">click</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"button[type='submit']"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">wait-for-navigation</span>
+        <span class="hl-key">assertions</span>:
+          - <span class="hl-key">type</span>: <span class="hl-str">url-matches</span>
+            <span class="hl-key">expected</span>: <span class="hl-str">"/dashboard"</span>
+          - <span class="hl-key">type</span>: <span class="hl-str">element-exists</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">".dashboard-container"</span>
+
+      - <span class="hl-key">name</span>: <span class="hl-str">"Fill and submit the form"</span>
+        <span class="hl-key">actions</span>:
+          - <span class="hl-key">action</span>: <span class="hl-str">type</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#item-name"</span>
+            <span class="hl-key">value</span>: <span class="hl-str">"My new item"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">click</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#item-form button[type='submit']"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">wait-for-selector</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">".success-toast"</span>
+        <span class="hl-key">assertions</span>:
+          - <span class="hl-key">type</span>: <span class="hl-str">element-exists</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">".success-toast"</span>
+          - <span class="hl-key">type</span>: <span class="hl-str">text-contains</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">".success-toast"</span>
+            <span class="hl-key">expected</span>: <span class="hl-str">"Item created"</span></code></pre>
+
+    <h3>Step Fields</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>name</code></td><td><span class="tag required">required</span></td><td>Descriptive name for the step, shown in output</td></tr>
+        <tr><td><code>actions</code></td><td><span class="tag optional">optional</span></td><td>Sequence of browser actions to perform</td></tr>
+        <tr><td><code>assertions</code></td><td><span class="tag required">required</span></td><td>Non-empty array of assertions to evaluate</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Rules</h3>
+    <div class="callout warn">
+      <strong>Exclusive format</strong>
+      A test must use <strong>either</strong> <code>steps</code> <strong>or</strong> top-level <code>actions</code>/<code>assertions</code> &mdash; not both. Each step requires a <code>name</code> and at least one <code>assertions</code> entry. Steps use the same actions and assertions as standard tests.
+    </div>
+
+    <div class="callout danger">
+      <strong>Behavior on failure</strong>
+      If any step fails (action error or assertion failure), remaining steps are skipped and the entire test is marked as failed. This prevents cascading errors when an early step like login doesn't succeed.
+    </div>
+
+    <h3>Console Output</h3>
+    <pre><code style="color: #8b8fa3">  <span style="font-weight:bold">[3/5] Login and submit a form</span>
+    <span style="font-weight:bold">Step [1/2] Login</span>
+    <span style="color:#00b894">PASS</span>  url-matches: /dashboard
+    <span style="color:#00b894">PASS</span>  element-exists: .dashboard-container
+      <span style="color:#00b894;font-weight:bold">STEP PASSED</span>
+    <span style="font-weight:bold">Step [2/2] Fill and submit the form</span>
+    <span style="color:#00b894">PASS</span>  element-exists: .success-toast
+    <span style="color:#00b894">PASS</span>  text-contains: .success-toast -> "Item created"
+      <span style="color:#00b894;font-weight:bold">STEP PASSED</span>
+    <span style="color:#00b894;font-weight:bold">PASSED</span> <span style="color:#636e82">(4.6s)</span></code></pre>
+
+    <h3>JSON Report</h3>
+    <p>Multi-step test results include a <code>steps</code> array instead of a top-level <code>assertions</code> array:</p>
+    <pre><code>{
+  <span class="hl-key">"name"</span>: <span class="hl-str">"Login and submit a form"</span>,
+  <span class="hl-key">"type"</span>: <span class="hl-str">"functional"</span>,
+  <span class="hl-key">"browser"</span>: <span class="hl-str">"chromium"</span>,
+  <span class="hl-key">"path"</span>: <span class="hl-str">"/login"</span>,
+  <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>,
+  <span class="hl-key">"durationMs"</span>: <span class="hl-num">4567</span>,
+  <span class="hl-key">"steps"</span>: [
+    {
+      <span class="hl-key">"name"</span>: <span class="hl-str">"Login"</span>,
+      <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>,
+      <span class="hl-key">"assertions"</span>: [
+        { <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>, <span class="hl-key">"message"</span>: <span class="hl-str">"url-matches: /dashboard"</span> }
+      ],
+      <span class="hl-key">"error"</span>: <span class="hl-bool">null</span>
+    },
+    {
+      <span class="hl-key">"name"</span>: <span class="hl-str">"Fill and submit the form"</span>,
+      <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>,
+      <span class="hl-key">"assertions"</span>: [
+        { <span class="hl-key">"status"</span>: <span class="hl-str">"passed"</span>, <span class="hl-key">"message"</span>: <span class="hl-str">"element-exists: .success-toast"</span> }
+      ],
+      <span class="hl-key">"error"</span>: <span class="hl-bool">null</span>
+    }
+  ],
+  <span class="hl-key">"error"</span>: <span class="hl-bool">null</span>
+}</code></pre>
   </section>
 
   <!-- Actions -->
@@ -781,6 +896,90 @@ node auto-e2e/index.js --config ci.yml --output reports/e2e.json</code></pre>
       <p>Clears the content of an input field.</p>
       <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">clear</span>
   <span class="hl-key">selector</span>: <span class="hl-str">"#search-input"</span>     <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>goto</code></h4>
+      <p>Navigates to a different URL mid-test. Paths starting with <code>/</code> are resolved relative to <code>app.url</code>. Full URLs (<code>http://...</code>) are used as-is.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">goto</span>
+  <span class="hl-key">url</span>: <span class="hl-str">"/items/42/edit"</span>         <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>capture-text</code></h4>
+      <p>Captures the trimmed text content of an element and stores it in a named variable for later use via <code>{{variableName}}</code> interpolation.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">capture-text</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">".result-id"</span>        <span class="hl-comment"># required</span>
+  <span class="hl-key">variable</span>: <span class="hl-str">"itemId"</span>            <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>capture-attribute</code></h4>
+      <p>Captures the value of an HTML attribute and stores it in a named variable.</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">capture-attribute</span>
+  <span class="hl-key">selector</span>: <span class="hl-str">"a.result-link"</span>     <span class="hl-comment"># required</span>
+  <span class="hl-key">attribute</span>: <span class="hl-str">"href"</span>             <span class="hl-comment"># required</span>
+  <span class="hl-key">variable</span>: <span class="hl-str">"resultUrl"</span>         <span class="hl-comment"># required</span></code></pre>
+    </div>
+
+    <div class="card">
+      <h4><code>capture-url</code></h4>
+      <p>Extracts a value from the current page URL using a pattern and stores it in a named variable. Supports two pattern styles:</p>
+      <p><strong>Regex pattern</strong> (contains parentheses) &mdash; extracts the first capture group:</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">capture-url</span>
+  <span class="hl-key">pattern</span>: <span class="hl-str">"/items/(\\d+)"</span>      <span class="hl-comment"># required</span>
+  <span class="hl-key">variable</span>: <span class="hl-str">"itemId"</span>            <span class="hl-comment"># required</span></code></pre>
+      <p><strong>Named segment pattern</strong> (uses <code>:name</code> syntax) &mdash; converts to regex internally:</p>
+      <pre><code>- <span class="hl-key">action</span>: <span class="hl-str">capture-url</span>
+  <span class="hl-key">pattern</span>: <span class="hl-str">"/items/:itemId"</span>     <span class="hl-comment"># required</span>
+  <span class="hl-key">variable</span>: <span class="hl-str">"itemId"</span>            <span class="hl-comment"># required</span></code></pre>
+    </div>
+  </section>
+
+  <!-- Variable Interpolation -->
+  <section id="variables">
+    <h2>Variable Interpolation</h2>
+    <p>Actions and assertions support <code>{{variableName}}</code> placeholders that are replaced at runtime with values captured earlier in the test. This enables dynamic, data-driven flows.</p>
+    <p>Variables are captured using <code>capture-text</code>, <code>capture-attribute</code>, or <code>capture-url</code> actions. They can be used in any string field: <code>selector</code>, <code>value</code>, <code>url</code>, <code>expected</code>, <code>attribute</code>, <code>key</code>.</p>
+
+    <pre><code><span class="hl-key">tests</span>:
+  - <span class="hl-key">name</span>: <span class="hl-str">"Create item and verify details page"</span>
+    <span class="hl-key">path</span>: <span class="hl-str">"/items/new"</span>
+    <span class="hl-key">steps</span>:
+      - <span class="hl-key">name</span>: <span class="hl-str">"Create item"</span>
+        <span class="hl-key">actions</span>:
+          - <span class="hl-key">action</span>: <span class="hl-str">type</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#name"</span>
+            <span class="hl-key">value</span>: <span class="hl-str">"My Item"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">click</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#submit"</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">wait-for-navigation</span>
+          - <span class="hl-key">action</span>: <span class="hl-str">capture-url</span>
+            <span class="hl-key">pattern</span>: <span class="hl-str">"/items/:id"</span>
+            <span class="hl-key">variable</span>: <span class="hl-str">"id"</span>
+        <span class="hl-key">assertions</span>:
+          - <span class="hl-key">type</span>: <span class="hl-str">url-matches</span>
+            <span class="hl-key">expected</span>: <span class="hl-str">"/items/{{id}}"</span>
+
+      - <span class="hl-key">name</span>: <span class="hl-str">"Verify details page"</span>
+        <span class="hl-key">actions</span>:
+          - <span class="hl-key">action</span>: <span class="hl-str">goto</span>
+            <span class="hl-key">url</span>: <span class="hl-str">"/items/{{id}}/edit"</span>
+        <span class="hl-key">assertions</span>:
+          - <span class="hl-key">type</span>: <span class="hl-str">element-exists</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">"#item-{{id}}"</span>
+          - <span class="hl-key">type</span>: <span class="hl-str">text-contains</span>
+            <span class="hl-key">selector</span>: <span class="hl-str">".item-title"</span>
+            <span class="hl-key">expected</span>: <span class="hl-str">"My Item"</span></code></pre>
+
+    <div class="callout">
+      <strong>Scope</strong>
+      Variables are shared across all steps in a multi-step test. In standard tests, variables are shared across all actions and assertions within the same test. Each test starts with a fresh, empty variable store.
+    </div>
+
+    <div class="callout warn">
+      <strong>Unknown placeholders</strong>
+      If a <code>{{varName}}</code> references a variable that hasn't been captured yet, it is left as-is in the string (not replaced).
     </div>
   </section>
 
@@ -1168,7 +1367,7 @@ Report saved to auto-e2e-results.json
     </table>
 
     <h3>Unit Tests</h3>
-    <p>The project includes 80 unit tests covering the critical modules. Run them with:</p>
+    <p>The project includes 114 unit tests covering the critical modules. Run them with:</p>
     <pre><code>cd auto-e2e
 npm test</code></pre>
     <p>Tests use Node.js built-in <code>node:test</code> runner &mdash; no extra dependencies needed.</p>

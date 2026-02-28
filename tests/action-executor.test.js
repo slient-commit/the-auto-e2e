@@ -110,4 +110,92 @@ describe('action-executor.execute', () => {
       /Unknown action: double-click/,
     );
   });
+
+  // ── goto ──────────────────────────────────────────────
+
+  it('delegates goto to page.goto with absolute URL', async () => {
+    const page = mockPage();
+    page.goto = async (url, opts) => page.calls.push({ method: 'goto', args: [url, opts] });
+    await execute(page, { action: 'goto', url: 'http://example.com/page' });
+    assert.equal(page.calls[0].method, 'goto');
+    assert.equal(page.calls[0].args[0], 'http://example.com/page');
+  });
+
+  it('delegates goto with relative path prepends baseUrl', async () => {
+    const page = mockPage();
+    page.goto = async (url, opts) => page.calls.push({ method: 'goto', args: [url, opts] });
+    await execute(page, { action: 'goto', url: '/items/42' }, {}, 'http://localhost:4200');
+    assert.equal(page.calls[0].args[0], 'http://localhost:4200/items/42');
+  });
+
+  // ── capture-text ──────────────────────────────────────
+
+  it('capture-text stores trimmed text in variables', async () => {
+    const page = mockPage();
+    page.textContent = async () => '  ABC-123  ';
+    const variables = {};
+    await execute(page, { action: 'capture-text', selector: '.id', variable: 'myId' }, variables);
+    assert.equal(variables.myId, 'ABC-123');
+  });
+
+  // ── capture-attribute ─────────────────────────────────
+
+  it('capture-attribute stores attribute value in variables', async () => {
+    const page = mockPage();
+    page.getAttribute = async () => '/items/99';
+    const variables = {};
+    await execute(page, { action: 'capture-attribute', selector: 'a', attribute: 'href', variable: 'link' }, variables);
+    assert.equal(variables.link, '/items/99');
+  });
+
+  // ── capture-url ───────────────────────────────────────
+
+  it('capture-url extracts value with regex pattern', async () => {
+    const page = mockPage();
+    page.url = () => 'http://localhost:4200/items/42/details';
+    const variables = {};
+    await execute(page, { action: 'capture-url', pattern: '/items/(\\d+)', variable: 'itemId' }, variables);
+    assert.equal(variables.itemId, '42');
+  });
+
+  it('capture-url extracts value with named segment pattern', async () => {
+    const page = mockPage();
+    page.url = () => 'http://localhost:4200/items/99/edit';
+    const variables = {};
+    await execute(page, { action: 'capture-url', pattern: '/items/:itemId', variable: 'itemId' }, variables);
+    assert.equal(variables.itemId, '99');
+  });
+
+  it('capture-url throws when pattern does not match', async () => {
+    const page = mockPage();
+    page.url = () => 'http://localhost:4200/dashboard';
+    await assert.rejects(
+      () => execute(page, { action: 'capture-url', pattern: '/items/(\\d+)', variable: 'id' }, {}),
+      /did not match URL/,
+    );
+  });
+
+  // ── variable interpolation ────────────────────────────
+
+  it('interpolates variables in type action value', async () => {
+    const page = mockPage();
+    const variables = { itemId: '42' };
+    await execute(page, { action: 'type', selector: '#field', value: 'ID: {{itemId}}' }, variables);
+    assert.deepEqual(page.calls[0].args, ['#field', 'ID: 42']);
+  });
+
+  it('interpolates variables in goto url', async () => {
+    const page = mockPage();
+    page.goto = async (url, opts) => page.calls.push({ method: 'goto', args: [url, opts] });
+    const variables = { id: '55' };
+    await execute(page, { action: 'goto', url: '/items/{{id}}/edit' }, variables, 'http://localhost:4200');
+    assert.equal(page.calls[0].args[0], 'http://localhost:4200/items/55/edit');
+  });
+
+  it('interpolates variables in selector', async () => {
+    const page = mockPage();
+    const variables = { idx: '3' };
+    await execute(page, { action: 'click', selector: '#row-{{idx}}' }, variables);
+    assert.deepEqual(page.calls[0].args, ['#row-3']);
+  });
 });

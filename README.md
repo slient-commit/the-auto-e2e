@@ -248,9 +248,119 @@ tests:
 | `name` | **required** | Descriptive name shown in output |
 | `path` | **required** | URL path appended to `app.url` |
 | `actions` | optional | Sequence of browser actions to perform |
-| `assertions` | **required** | Non-empty array of assertions to evaluate |
+| `assertions` | **required*** | Non-empty array of assertions to evaluate |
+| `steps` | optional* | Array of sequential step blocks (see [Multi-Step Tests](#multi-step-tests)) |
+
+> **\*steps vs assertions:** A test must have **either** `assertions` (standard test) **or** `steps` (multi-step test) — not both. When using `steps`, top-level `actions` and `assertions` are not allowed.
 
 > **Behavior on failure:** If an **action** fails, remaining actions and all assertions are skipped — the test is marked failed immediately. If an **assertion** fails, remaining assertions still run to give a full picture.
+
+---
+
+## Multi-Step Tests
+
+Multi-step tests run multiple blocks of actions and assertions on the **same browser page**, preserving session state (cookies, tokens, localStorage) between steps. This is ideal for flows that depend on authentication or sequential state changes.
+
+Use `steps` instead of top-level `actions` and `assertions`:
+
+```yaml
+tests:
+  - name: "Login and submit a form"
+    path: "/login"
+    steps:
+      - name: "Login"
+        actions:
+          - action: type
+            selector: "#email"
+            value: "user@example.com"
+          - action: type
+            selector: "#password"
+            value: "secret123"
+          - action: click
+            selector: "button[type='submit']"
+          - action: wait-for-navigation
+        assertions:
+          - type: url-matches
+            expected: "/dashboard"
+          - type: element-exists
+            selector: ".dashboard-container"
+
+      - name: "Open the new-item form"
+        actions:
+          - action: click
+            selector: "#new-item-btn"
+          - action: wait-for-selector
+            selector: "#item-form"
+        assertions:
+          - type: element-visible
+            selector: "#item-form"
+
+      - name: "Fill and submit the form"
+        actions:
+          - action: type
+            selector: "#item-name"
+            value: "My new item"
+          - action: click
+            selector: "#item-form button[type='submit']"
+          - action: wait-for-selector
+            selector: ".success-toast"
+        assertions:
+          - type: element-exists
+            selector: ".success-toast"
+          - type: text-contains
+            selector: ".success-toast"
+            expected: "Item created"
+```
+
+### Step Fields
+
+| Field | Required | Description |
+|---|---|---|
+| `name` | **required** | Descriptive name for the step, shown in output |
+| `actions` | optional | Sequence of browser actions to perform |
+| `assertions` | **required** | Non-empty array of assertions to evaluate |
+
+### Rules
+
+- A test must use **either** `steps` **or** top-level `actions`/`assertions` — not both.
+- Each step requires a `name` and at least one `assertions` entry.
+- Steps use the same actions and assertions as standard tests.
+
+> **Behavior on failure:** If any step fails (action error or assertion failure), remaining steps are skipped and the entire test is marked as failed. This prevents cascading errors when an early step like login doesn't succeed.
+
+### JSON Report for Multi-Step Tests
+
+Multi-step test results include a `steps` array instead of a top-level `assertions` array:
+
+```json
+{
+  "name": "Login and submit a form",
+  "type": "functional",
+  "browser": "chromium",
+  "path": "/login",
+  "status": "passed",
+  "durationMs": 4567,
+  "steps": [
+    {
+      "name": "Login",
+      "status": "passed",
+      "assertions": [
+        { "status": "passed", "message": "url-matches: /dashboard" }
+      ],
+      "error": null
+    },
+    {
+      "name": "Fill and submit the form",
+      "status": "passed",
+      "assertions": [
+        { "status": "passed", "message": "element-exists: .success-toast" }
+      ],
+      "error": null
+    }
+  ],
+  "error": null
+}
+```
 
 ---
 
@@ -350,6 +460,100 @@ Clears the content of an input field.
 - action: clear
   selector: "#search-input"     # required
 ```
+
+### `goto`
+
+Navigates to a different URL mid-test. Paths starting with `/` are resolved relative to `app.url`. Full URLs (`http://...`) are used as-is.
+
+```yaml
+- action: goto
+  url: "/items/42/edit"         # required
+```
+
+### `capture-text`
+
+Captures the trimmed text content of an element and stores it in a named variable for later use.
+
+```yaml
+- action: capture-text
+  selector: ".result-id"        # required
+  variable: "itemId"            # required
+```
+
+### `capture-attribute`
+
+Captures the value of an HTML attribute and stores it in a named variable.
+
+```yaml
+- action: capture-attribute
+  selector: "a.result-link"     # required
+  attribute: "href"             # required
+  variable: "resultUrl"         # required
+```
+
+### `capture-url`
+
+Extracts a value from the current page URL using a pattern and stores it in a named variable. Supports two pattern styles:
+
+**Regex pattern** (contains parentheses) — extracts the first capture group:
+
+```yaml
+- action: capture-url
+  pattern: "/items/(\\d+)"      # required
+  variable: "itemId"            # required
+```
+
+**Named segment pattern** (uses `:name` syntax) — converts to regex internally:
+
+```yaml
+- action: capture-url
+  pattern: "/items/:itemId"     # required
+  variable: "itemId"            # required
+```
+
+---
+
+## Variable Interpolation
+
+Actions and assertions support `{{variableName}}` placeholders that are replaced at runtime with values captured earlier in the test. This enables dynamic, data-driven flows.
+
+Variables are captured using `capture-text`, `capture-attribute`, or `capture-url` actions. They can be used in any string field: `selector`, `value`, `url`, `expected`, `attribute`, `key`.
+
+```yaml
+tests:
+  - name: "Create item and verify details page"
+    path: "/items/new"
+    steps:
+      - name: "Create item"
+        actions:
+          - action: type
+            selector: "#name"
+            value: "My Item"
+          - action: click
+            selector: "#submit"
+          - action: wait-for-navigation
+          - action: capture-url
+            pattern: "/items/:id"
+            variable: "id"
+        assertions:
+          - type: url-matches
+            expected: "/items/{{id}}"
+
+      - name: "Verify details page"
+        actions:
+          - action: goto
+            url: "/items/{{id}}/edit"
+        assertions:
+          - type: element-exists
+            selector: "#item-{{id}}"
+          - type: text-contains
+            selector: ".item-title"
+            expected: "My Item"
+```
+
+> **Scope:** Variables are shared across all steps in a multi-step test. In standard tests, variables are shared across all actions and assertions within the same test. Each test starts with a fresh, empty variable store.
+
+> **Unknown placeholders:** If a `{{varName}}` references a variable that hasn't been captured yet, it is left as-is in the string (not replaced).
 
 ---
 
@@ -562,6 +766,16 @@ Browsers: chromium, firefox
     FAIL  text-contains: ".welcome" expected "Hello" but got "Hi"
     FAILED (3.1s)
 
+  [3/5] Login and submit a form
+    Step [1/2] Login
+    PASS  url-matches: /dashboard
+    PASS  element-exists: .dashboard-container
+      STEP PASSED
+    Step [2/2] Fill and submit the form
+    PASS  element-exists: .success-toast
+      STEP PASSED
+    PASSED (4.6s)
+
   [4/5] Homepage visual check
     BASELINE CREATED  Baseline created at screenshots/baseline/chromium/homepage.png
     BASELINE CREATED (0.8s)
@@ -730,7 +944,7 @@ The tool is composed of focused modules with clear separation of concerns:
 
 ### Unit Tests
 
-The project includes 80 unit tests covering the critical modules. Run them with:
+The project includes 114 unit tests covering the critical modules. Run them with:
 
 ```bash
 cd auto-e2e

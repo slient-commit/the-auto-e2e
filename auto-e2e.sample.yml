@@ -75,6 +75,90 @@ tests:
       - type: element-visible
         selector: "nav"
 
+  # ── Multi-step test (long test) ────────────────
+  # Use "steps" instead of "actions"/"assertions" to keep the same
+  # browser page open across multiple blocks.  Ideal for flows that
+  # depend on session state (tokens, cookies, etc.).
+  # If any step fails, subsequent steps are skipped.
+  - name: "Login then submit a form"
+    path: "/login"
+    steps:
+      - name: "Login"
+        actions:
+          - action: type
+            selector: "#email"
+            value: "user@example.com"
+          - action: type
+            selector: "#password"
+            value: "secret123"
+          - action: click
+            selector: "button[type='submit']"
+          - action: wait-for-navigation
+        assertions:
+          - type: url-matches
+            expected: "/dashboard"
+          - type: element-exists
+            selector: ".dashboard-container"
+
+      - name: "Open the new-item form"
+        actions:
+          - action: click
+            selector: "#new-item-btn"
+          - action: wait-for-selector
+            selector: "#item-form"
+        assertions:
+          - type: element-visible
+            selector: "#item-form"
+
+      - name: "Fill and submit the form"
+        actions:
+          - action: type
+            selector: "#item-name"
+            value: "My new item"
+          - action: click
+            selector: "#item-form button[type='submit']"
+          - action: wait-for-selector
+            selector: ".success-toast"
+        assertions:
+          - type: element-exists
+            selector: ".success-toast"
+          - type: text-contains
+            selector: ".success-toast"
+            expected: "Item created"
+
+  # ── Capture & goto example ─────────────────────
+  # Capture values from the page and use them in subsequent steps.
+  # {{variableName}} is replaced at runtime in any string field.
+  # - name: "Create item and verify detail page"
+  #   path: "/items/new"
+  #   steps:
+  #     - name: "Submit the form"
+  #       actions:
+  #         - action: type
+  #           selector: "#item-name"
+  #           value: "Test Item"
+  #         - action: click
+  #           selector: "button[type='submit']"
+  #         - action: wait-for-navigation
+  #       assertions:
+  #         - type: url-matches
+  #           expected: "/items/"
+  #
+  #     - name: "Capture new item ID and navigate to edit page"
+  #       actions:
+  #         - action: capture-url
+  #           pattern: "/items/:itemId"
+  #           variable: "itemId"
+  #         - action: goto
+  #           url: "/items/{{itemId}}/edit"
+  #         - action: wait-for-selector
+  #           selector: "#edit-form"
+  #       assertions:
+  #         - type: element-visible
+  #           selector: "#edit-form"
+  #         - type: url-matches
+  #           expected: "/items/{{itemId}}/edit"
+
 # ──────────────────────────────────────────────
 # Visual Regression Test Cases
 # ──────────────────────────────────────────────
@@ -119,6 +203,14 @@ visualTests:
 #   wait-for-navigation - { action: wait-for-navigation }
 #   press          - { action: press, selector: "#input", key: "Enter" }
 #   clear          - { action: clear, selector: "#input" }
+#   goto           - { action: goto, url: "/items/{{itemId}}" }
+#   capture-text   - { action: capture-text, selector: ".id", variable: "itemId" }
+#   capture-attribute - { action: capture-attribute, selector: "a", attribute: "href", variable: "link" }
+#   capture-url    - { action: capture-url, pattern: "/items/:id", variable: "id" }
+#
+# Variable Interpolation:
+#   Use {{variableName}} in any string field (selector, value, url, expected)
+#   to inject values captured by capture-* actions.
 #
 # Supported Assertions:
 #   element-exists     - { type: element-exists, selector: "h1" }

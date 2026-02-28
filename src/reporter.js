@@ -36,6 +36,18 @@ function printTestStart(index, total, testName) {
   console.log(chalk.bold(`  [${index + 1}/${total}] ${testName}`));
 }
 
+function printStepStart(stepIndex, totalSteps, stepName) {
+  console.log(chalk.bold(`    Step [${stepIndex + 1}/${totalSteps}] ${stepName}`));
+}
+
+function printStepEnd(status) {
+  if (status === 'passed') {
+    console.log(`      ${chalk.green.bold('STEP PASSED')}`);
+  } else {
+    console.log(`      ${chalk.red.bold('STEP FAILED')}`);
+  }
+}
+
 function printAssertionResult(result) {
   const icon = result.status === 'passed' ? chalk.green('PASS') : chalk.red('FAIL');
   console.log(`    ${icon}  ${result.message}`);
@@ -116,6 +128,8 @@ module.exports = {
   printBrowserStart,
   printBrowserEnd,
   printTestStart,
+  printStepStart,
+  printStepEnd,
   printAssertionResult,
   printVisualResult,
   printTestEnd,
