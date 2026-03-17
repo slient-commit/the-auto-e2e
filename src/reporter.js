@@ -2,7 +2,8 @@ const fs = require('fs');
 const chalk = require('chalk');
 
 function printBanner() {
-  console.log(chalk.bold.cyan('\nauto-e2e v1.0.0\n'));
+  const version = require('../package.json').version;
+  console.log(chalk.bold.cyan(`\nauto-e2e v${version}\n`));
 }
 
 function printServerStart(command, url) {

@@ -1,6 +1,6 @@
-# auto-e2e
+# the-auto-e2e
 
-A portable, YAML-driven end-to-end testing framework powered by Playwright. Drop it into any frontend project, run the same tests across multiple browsers with a single configuration file.
+A YAML-driven end-to-end testing framework powered by Playwright. Install it via npm, configure with a single YAML file, run the same tests across multiple browsers.
 
 **Node.js >= 18** | **Playwright** | **Visual Regression** | **Multi-Browser** | **CommonJS** | **Cross-Platform**
 
@@ -8,23 +8,26 @@ A portable, YAML-driven end-to-end testing framework powered by Playwright. Drop
 
 ## Quick Start
 
-### 1. Copy the `auto-e2e` folder into your project
-
-### 2. Run setup
+### 1. Install
 
 ```bash
-node auto-e2e/setup.js
+npm install -D the-auto-e2e
 ```
 
-This single command will:
-- Install all npm dependencies
+### 2. Initialize
+
+```bash
+npx the-auto-e2e init
+```
+
+This will:
 - Install Playwright Chromium browser
 - Generate a starter `auto-e2e.yml` in your project root
 
 To install additional browsers, pass them as arguments:
 
 ```bash
-node auto-e2e/setup.js chromium firefox webkit
+npx the-auto-e2e init chromium firefox webkit
 ```
 
 ### 3. Edit `auto-e2e.yml` to match your app
@@ -45,22 +48,8 @@ tests:
 ### 4. Run
 
 ```bash
-node auto-e2e/index.js
+npx the-auto-e2e
 ```
-
----
-
-## Manual Installation
-
-If you prefer to set up manually instead of using `setup.js`:
-
-```bash
-cd auto-e2e
-npm install
-npx playwright install chromium
-```
-
-Then copy `auto-e2e.sample.yml` to your project root as `auto-e2e.yml`.
 
 > **What happens:** The tool starts your dev server, waits for it to be ready, then for each browser in the `browsers` list it opens a headless instance, navigates to each test path, executes actions, evaluates assertions, and prints results. The server is automatically killed when done.
 
@@ -75,11 +64,12 @@ Load YAML → Start Server → Poll URL → For each browser → Launch & Run Te
 ## Project Structure
 
 ```
-auto-e2e/
+the-auto-e2e/
   package.json
-  index.js                      ← CLI entry point
-  setup.js                      ← one-command setup script
+  index.js                      ← CLI entry point (subcommand routing)
   auto-e2e.sample.yml           ← example config
+  commands/
+    init.js                     ← `the-auto-e2e init` subcommand
   src/
     config-loader.js            ← parse YAML, validate, apply defaults
     schema.js                   ← validation rules
@@ -97,6 +87,7 @@ auto-e2e/
     assertion-engine.test.js    ← assertion evaluation tests
     reporter.test.js            ← JSON report tests
     utils.test.js               ← utility function tests
+    init.test.js                ← init command tests
 ```
 
 ---
@@ -194,11 +185,20 @@ visualDefaults:
 
 ---
 
-## CLI Flags
+## CLI Usage
 
 ```bash
-node auto-e2e/index.js [options]
+npx the-auto-e2e [command] [options]
 ```
+
+### Commands
+
+| Command | Description |
+|---|---|
+| `run` (default) | Run the E2E test suite |
+| `init [browsers...]` | Generate starter config and install Playwright browsers |
+
+### Options (for `run`)
 
 | Flag | Default | Description |
 |---|---|---|
@@ -208,14 +208,23 @@ node auto-e2e/index.js [options]
 ### Examples
 
 ```bash
-# Use defaults
-node auto-e2e/index.js
+# Run tests with defaults
+npx the-auto-e2e
+
+# Explicit run subcommand
+npx the-auto-e2e run
 
 # Custom config file
-node auto-e2e/index.js --config tests/e2e-config.yml
+npx the-auto-e2e --config tests/e2e-config.yml
 
 # Custom config and output path
-node auto-e2e/index.js --config ci.yml --output reports/e2e.json
+npx the-auto-e2e run --config ci.yml --output reports/e2e.json
+
+# Initialize with default browser (chromium)
+npx the-auto-e2e init
+
+# Initialize with multiple browsers
+npx the-auto-e2e init chromium firefox webkit
 ```
 
 ---
@@ -930,8 +939,8 @@ The tool is composed of focused modules with clear separation of concerns:
 
 | Module | Responsibility |
 |---|---|
-| `index.js` | CLI entry point — parses args, wires modules, manages lifecycle |
-| `setup.js` | One-command setup — installs deps, Playwright browsers, generates starter config |
+| `index.js` | CLI entry point — subcommand routing, test orchestration |
+| `commands/init.js` | Init subcommand — installs Playwright browsers, generates starter config |
 | `config-loader.js` | Reads YAML, applies defaults, validates schema, resolves paths |
 | `schema.js` | Defines and enforces all validation rules for the config |
 | `server-manager.js` | Spawns dev server, polls URL, kills process (cross-platform) |
@@ -944,10 +953,9 @@ The tool is composed of focused modules with clear separation of concerns:
 
 ### Unit Tests
 
-The project includes 114 unit tests covering the critical modules. Run them with:
+The project includes 118 unit tests covering the critical modules. Run them with:
 
 ```bash
-cd auto-e2e
 npm test
 ```
 
@@ -963,4 +971,4 @@ Tests use Node.js built-in `node:test` runner — no extra dependencies needed.
 
 ---
 
-auto-e2e v1.0.0 · Powered by Playwright & pixelmatch
+the-auto-e2e v1.0.0 · Powered by Playwright & pixelmatch

@@ -1,16 +1,32 @@
 {
-  "name": "auto-e2e",
+  "name": "the-auto-e2e",
   "version": "1.0.0",
-  "description": "Portable YAML-driven E2E testing framework powered by Playwright",
+  "description": "YAML-driven E2E testing framework powered by Playwright",
   "main": "index.js",
   "bin": {
-    "auto-e2e": "./index.js"
+    "the-auto-e2e": "./index.js"
   },
+  "files": [
+    "index.js",
+    "src/",
+    "commands/",
+    "auto-e2e.sample.yml",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
-    "start": "node index.js",
-    "start:config": "node index.js --config",
     "test": "node --test tests/*.test.js"
   },
+  "keywords": [
+    "e2e",
+    "end-to-end",
+    "testing",
+    "playwright",
+    "yaml",
+    "visual-regression",
+    "screenshot",
+    "browser-testing"
+  ],
   "dependencies": {
     "playwright": "^1.52.0",
     "js-yaml": "^4.1.0",
