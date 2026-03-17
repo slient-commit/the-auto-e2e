@@ -1,5 +1,7 @@
 # the-auto-e2e
 
+[![GitHub](https://img.shields.io/badge/GitHub-slient--commit%2Fauto--e2e-blue?logo=github)](https://github.com/slient-commit/the-auto-e2e) [![npm](https://img.shields.io/npm/v/the-auto-e2e)](https://www.npmjs.com/package/the-auto-e2e)
+
 A YAML-driven end-to-end testing framework powered by Playwright. Install it via npm, configure with a single YAML file, run the same tests across multiple browsers.
 
 **Node.js >= 18** | **Playwright** | **Visual Regression** | **Multi-Browser** | **CommonJS** | **Cross-Platform**
